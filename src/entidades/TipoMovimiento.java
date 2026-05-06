@@ -1,0 +1,8 @@
+package entidades;
+
+public enum TipoMovimiento {
+	DEBITO,
+	CREDITO,
+	TRANSFERENCIA_ENVIADA,
+	TRANSFERENCIA_RECIBIDA
+}

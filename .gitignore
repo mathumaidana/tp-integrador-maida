@@ -1,0 +1,8 @@
+bin/
+data/
+
+lib/*.jar
+!lib/.gitkeep
+
+*.class
+.DS_Store
