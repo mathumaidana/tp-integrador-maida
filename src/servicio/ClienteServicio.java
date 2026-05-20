@@ -5,12 +5,12 @@ import java.util.List;
 
 import entidades.Cliente;
 import entidades.Cuenta;
-import entidades.Movimiento;
 import entidades.Tarjeta;
 import persistencia.ClienteDao;
 import persistencia.CuentaDao;
 import persistencia.MovimientoDao;
 import persistencia.TarjetaDao;
+import persistencia.UsuarioDao;
 
 public class ClienteServicio {
 
@@ -18,24 +18,25 @@ public class ClienteServicio {
 	private final CuentaDao cuentaDao;
 	private final MovimientoDao movimientoDao;
 	private final TarjetaDao tarjetaDao;
+	private final UsuarioDao usuarioDao;
 
 	public ClienteServicio(ClienteDao clienteDao) {
-		this(clienteDao, new CuentaDao(), new MovimientoDao(), new TarjetaDao());
+		this(clienteDao, new CuentaDao(), new MovimientoDao(), new TarjetaDao(), new UsuarioDao());
 	}
 
 	public ClienteServicio(ClienteDao clienteDao, CuentaDao cuentaDao,
-			MovimientoDao movimientoDao, TarjetaDao tarjetaDao) {
+			MovimientoDao movimientoDao, TarjetaDao tarjetaDao, UsuarioDao usuarioDao) {
 		this.clienteDao = clienteDao;
 		this.cuentaDao = cuentaDao;
 		this.movimientoDao = movimientoDao;
 		this.tarjetaDao = tarjetaDao;
+		this.usuarioDao = usuarioDao;
 	}
 
 	public void agregar(Cliente c) throws GrabandoException, ClienteExistenteException {
 		try {
-			Cliente existente = clienteDao.buscarPorUsername(c.getUsername());
-			if (existente != null) {
-				throw new ClienteExistenteException("Ya existe un cliente con username '" + c.getUsername() + "'");
+			if (usuarioDao.buscarPorUsername(c.getUsername()) != null) {
+				throw new ClienteExistenteException("Ya existe un usuario con username '" + c.getUsername() + "'");
 			}
 			clienteDao.grabar(c);
 		} catch (SQLException e) {
@@ -82,12 +83,11 @@ public class ClienteServicio {
 				throw new ClienteInexistenteException("No existe un cliente con id " + id);
 			}
 			for (Cuenta c : cuentaDao.leerPorTitular(id)) {
-				for (Movimiento m : movimientoDao.leerPorCuenta(c)) {
-					movimientoDao.borrar(m.getId());
-				}
+				movimientoDao.borrarPorCuenta(c.getId());
 				cuentaDao.borrar(c.getId());
 			}
 			for (Tarjeta t : tarjetaDao.leerPorTitular(id)) {
+				movimientoDao.borrarPorTarjeta(t.getId());
 				tarjetaDao.borrar(t.getId());
 			}
 			clienteDao.borrar(id);

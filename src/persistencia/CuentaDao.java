@@ -11,6 +11,8 @@ import entidades.TipoCuenta;
 
 public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 
+	private static final String COLS = "ID, ALIAS, CBU, SALDO, TIPO, ID_TITULAR";
+
 	private final ClienteDao clienteDao;
 
 	public CuentaDao() {
@@ -32,49 +34,24 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 
 	@Override
 	public Cuenta leer(Integer id) throws SQLException {
-		String sql = "SELECT ID, ALIAS, CBU, SALDO, TIPO, ID_TITULAR FROM CUENTAS WHERE ID = ?";
-		ResultSet rs = selectSql(sql, id);
-		Cuenta cuenta = null;
-		Integer idTitular = null;
-		try {
-			if (rs.next()) {
-				cuenta = mapearSinTitular(rs);
-				idTitular = rs.getInt("ID_TITULAR");
-			}
-		} finally {
-			if (rs != null) rs.close();
-			cerrarConexion();
-		}
-		if (cuenta != null && idTitular != null) {
-			Cliente titular = clienteDao.leer(idTitular);
-			cuenta.setTitular(titular);
-		}
-		return cuenta;
+		return cargarUna("SELECT " + COLS + " FROM CUENTAS WHERE ID = ?", id);
+	}
+
+	public Cuenta buscarPorCbu(String cbu) throws SQLException {
+		return cargarUna("SELECT " + COLS + " FROM CUENTAS WHERE CBU = ?", cbu);
+	}
+
+	public Cuenta buscarPorAlias(String alias) throws SQLException {
+		return cargarUna("SELECT " + COLS + " FROM CUENTAS WHERE ALIAS = ?", alias);
 	}
 
 	@Override
 	public List<Cuenta> leer() throws SQLException {
-		String sql = "SELECT ID, ALIAS, CBU, SALDO, TIPO, ID_TITULAR FROM CUENTAS ORDER BY ID";
-		ResultSet rs = selectSql(sql);
-		List<Cuenta> lista = new ArrayList<>();
-		List<Integer> idsTitulares = new ArrayList<>();
-		try {
-			while (rs.next()) {
-				lista.add(mapearSinTitular(rs));
-				idsTitulares.add(rs.getInt("ID_TITULAR"));
-			}
-		} finally {
-			if (rs != null) rs.close();
-			cerrarConexion();
-		}
-		for (int i = 0; i < lista.size(); i++) {
-			lista.get(i).setTitular(clienteDao.leer(idsTitulares.get(i)));
-		}
-		return lista;
+		return cargarVarias("SELECT " + COLS + " FROM CUENTAS ORDER BY ID");
 	}
 
 	public List<Cuenta> leerPorTitular(Integer idTitular) throws SQLException {
-		String sql = "SELECT ID, ALIAS, CBU, SALDO, TIPO, ID_TITULAR FROM CUENTAS WHERE ID_TITULAR = ? ORDER BY ID";
+		String sql = "SELECT " + COLS + " FROM CUENTAS WHERE ID_TITULAR = ? ORDER BY ID";
 		ResultSet rs = selectSql(sql, idTitular);
 		List<Cuenta> lista = new ArrayList<>();
 		try {
@@ -105,10 +82,51 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 		);
 	}
 
+	public void actualizarSaldo(Integer idCuenta, Double saldo) throws SQLException {
+		updateDeleteInsertSql("UPDATE CUENTAS SET SALDO = ? WHERE ID = ?", saldo, idCuenta);
+	}
+
 	@Override
 	public void borrar(Integer id) throws SQLException {
-		String sql = "DELETE FROM CUENTAS WHERE ID = ?";
-		updateDeleteInsertSql(sql, id);
+		updateDeleteInsertSql("DELETE FROM CUENTAS WHERE ID = ?", id);
+	}
+
+	private Cuenta cargarUna(String sql, Object param) throws SQLException {
+		ResultSet rs = selectSql(sql, param);
+		Cuenta cuenta = null;
+		Integer idTitular = null;
+		try {
+			if (rs.next()) {
+				cuenta = mapearSinTitular(rs);
+				idTitular = rs.getInt("ID_TITULAR");
+			}
+		} finally {
+			if (rs != null) rs.close();
+			cerrarConexion();
+		}
+		if (cuenta != null && idTitular != null) {
+			cuenta.setTitular(clienteDao.leer(idTitular));
+		}
+		return cuenta;
+	}
+
+	private List<Cuenta> cargarVarias(String sql) throws SQLException {
+		ResultSet rs = selectSql(sql);
+		List<Cuenta> lista = new ArrayList<>();
+		List<Integer> ids = new ArrayList<>();
+		try {
+			while (rs.next()) {
+				lista.add(mapearSinTitular(rs));
+				ids.add(rs.getInt("ID_TITULAR"));
+			}
+		} finally {
+			if (rs != null) rs.close();
+			cerrarConexion();
+		}
+		for (int i = 0; i < lista.size(); i++) {
+			lista.get(i).setTitular(clienteDao.leer(ids.get(i)));
+		}
+		return lista;
 	}
 
 	private Cuenta mapearSinTitular(ResultSet rs) throws SQLException {

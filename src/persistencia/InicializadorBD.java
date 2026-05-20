@@ -36,8 +36,8 @@ public class InicializadorBD extends BaseH2 {
 			+ "MONTO DOUBLE NOT NULL, "
 			+ "TIPO VARCHAR(30) NOT NULL, "
 			+ "DESCRIPCION VARCHAR(255), "
-			+ "ID_CUENTA INT NOT NULL, "
-			+ "FOREIGN KEY (ID_CUENTA) REFERENCES CUENTAS(ID)"
+			+ "ID_CUENTA INT, "
+			+ "ID_TARJETA INT"
 			+ ")";
 
 		String tarjetas = "CREATE TABLE IF NOT EXISTS TARJETAS ("
@@ -54,7 +54,20 @@ public class InicializadorBD extends BaseH2 {
 		updateDeleteInsertSql(movimientos);
 		updateDeleteInsertSql(tarjetas);
 
+		migrarMovimientos();
 		seedAdmin();
+	}
+
+	private void migrarMovimientos() {
+		ejecutarSilencioso("ALTER TABLE MOVIMIENTOS ADD COLUMN IF NOT EXISTS ID_TARJETA INT");
+		ejecutarSilencioso("ALTER TABLE MOVIMIENTOS ALTER COLUMN ID_CUENTA DROP NOT NULL");
+	}
+
+	private void ejecutarSilencioso(String sql) {
+		try {
+			updateDeleteInsertSql(sql);
+		} catch (SQLException ignored) {
+		}
 	}
 
 	private void seedAdmin() throws SQLException {

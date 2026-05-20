@@ -9,17 +9,24 @@ public class Movimiento {
 	private TipoMovimiento tipo;
 	private String descripcion;
 	private Cuenta cuenta;
+	private Tarjeta tarjeta;
 
 	public Movimiento() {
 	}
 
 	public Movimiento(Integer id, LocalDateTime fecha, Double monto, TipoMovimiento tipo, String descripcion, Cuenta cuenta) {
+		this(id, fecha, monto, tipo, descripcion, cuenta, null);
+	}
+
+	public Movimiento(Integer id, LocalDateTime fecha, Double monto, TipoMovimiento tipo, String descripcion,
+			Cuenta cuenta, Tarjeta tarjeta) {
 		this.id = id;
 		this.fecha = fecha;
 		this.monto = monto;
 		this.tipo = tipo;
 		this.descripcion = descripcion;
 		this.cuenta = cuenta;
+		this.tarjeta = tarjeta;
 	}
 
 	public Integer getId() {
@@ -70,8 +77,16 @@ public class Movimiento {
 		this.cuenta = cuenta;
 	}
 
+	public Tarjeta getTarjeta() {
+		return tarjeta;
+	}
+
+	public void setTarjeta(Tarjeta tarjeta) {
+		this.tarjeta = tarjeta;
+	}
+
 	@Override
 	public String toString() {
-		return fecha + " - " + tipo + " - $" + monto + " - " + descripcion;
+		return fecha + "  " + tipo + "  $" + monto + (descripcion != null ? "  -  " + descripcion : "");
 	}
 }
