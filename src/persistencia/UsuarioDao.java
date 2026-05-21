@@ -7,6 +7,7 @@ import java.util.List;
 
 import entidades.Administrador;
 import entidades.Cliente;
+import entidades.Empleado;
 import entidades.Usuario;
 
 public class UsuarioDao extends BaseH2 {
@@ -68,6 +69,9 @@ public class UsuarioDao extends BaseH2 {
 		String rol = rs.getString("ROL");
 		if ("ADMIN".equals(rol)) {
 			return new Administrador(id, username, password, nombre, apellido, dni);
+		}
+		if ("EMPLEADO".equals(rol)) {
+			return new Empleado(id, username, password, nombre, apellido, dni);
 		}
 		return new Cliente(id, username, password, nombre, apellido, dni);
 	}

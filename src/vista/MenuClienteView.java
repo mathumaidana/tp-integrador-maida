@@ -10,8 +10,16 @@ import entidades.Cliente;
 
 public class MenuClienteView extends MenuView {
 
+	private final Cliente cliente;
+
 	public MenuClienteView(Cliente cliente) {
 		super(cliente);
+		this.cliente = cliente;
+	}
+
+	@Override
+	protected String tituloVentana() {
+		return "Home Banking";
 	}
 
 	@Override
@@ -20,16 +28,16 @@ public class MenuClienteView extends MenuView {
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		JButton cuentas = new JButton("Mis cuentas");
-		cuentas.addActionListener(e -> new MisCuentasView(cliente()));
+		cuentas.addActionListener(e -> new MisCuentasView(cliente));
 
 		JButton movimientos = new JButton("Movimientos");
-		movimientos.addActionListener(e -> new ResumenView(cliente()));
+		movimientos.addActionListener(e -> new ResumenView(cliente));
 
 		JButton transferir = new JButton("Transferencias");
-		transferir.addActionListener(e -> new FormularioTransferencia(cliente()));
+		transferir.addActionListener(e -> new FormularioTransferencia(cliente));
 
 		JButton tarjetas = new JButton("Mis tarjetas");
-		tarjetas.addActionListener(e -> new FormularioTarjeta(cliente()));
+		tarjetas.addActionListener(e -> new FormularioTarjeta(cliente));
 
 		JButton salir = new JButton("Salir");
 		salir.addActionListener(e -> frame.dispose());

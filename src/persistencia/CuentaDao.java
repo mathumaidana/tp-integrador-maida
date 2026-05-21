@@ -130,12 +130,12 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 	}
 
 	private Cuenta mapearSinTitular(ResultSet rs) throws SQLException {
-		Cuenta c = new Cuenta();
+		TipoCuenta tipo = TipoCuenta.valueOf(rs.getString("TIPO"));
+		Cuenta c = tipo.nuevaCuenta();
 		c.setId(rs.getInt("ID"));
 		c.setAlias(rs.getString("ALIAS"));
 		c.setCbu(rs.getString("CBU"));
 		c.setSaldo(rs.getDouble("SALDO"));
-		c.setTipo(TipoCuenta.valueOf(rs.getString("TIPO")));
 		return c;
 	}
 }

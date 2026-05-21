@@ -24,6 +24,7 @@ import javax.swing.border.EmptyBorder;
 import entidades.Cliente;
 import entidades.Cuenta;
 import entidades.Movimiento;
+import entidades.TipoMovimiento;
 import persistencia.CuentaDao;
 import persistencia.MovimientoDao;
 import servicio.CuentaServicio;
@@ -51,12 +52,15 @@ public class ResumenView {
 		frame.setLayout(new BorderLayout());
 		JPanel root = new JPanel(new BorderLayout(MARGIN, MARGIN));
 		root.setBorder(new EmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN));
-		root.add(crearFiltros(), BorderLayout.NORTH);
 		root.add(crearListado(), BorderLayout.CENTER);
+		root.add(crearFiltros(), BorderLayout.NORTH);
 		root.add(crearBotonera(), BorderLayout.SOUTH);
 		frame.add(root, BorderLayout.CENTER);
-		frame.setSize(680, 460);
+		frame.setMinimumSize(new Dimension(720, 460));
+		frame.setSize(800, 520);
 		frame.setLocationRelativeTo(null);
+		cargarCuentas();
+		cuentaCombo.addActionListener(e -> refrescar());
 		refrescar();
 		frame.setVisible(true);
 	}
@@ -68,15 +72,6 @@ public class ResumenView {
 		JPanel fila = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
 		fila.add(new JLabel("Cuenta:"));
 		cuentaCombo = new JComboBox<>();
-		try {
-			List<Cuenta> cuentas = (cliente == null)
-				? cuentaServicio.listar()
-				: cuentaServicio.listarPorCliente(cliente);
-			for (Cuenta c : cuentas) cuentaCombo.addItem(c);
-		} catch (LeyendoException ex) {
-			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		cuentaCombo.addActionListener(e -> refrescar());
 		fila.add(cuentaCombo);
 
 		fila.add(new JLabel("Mes (AAAA-MM):"));
@@ -105,10 +100,10 @@ public class ResumenView {
 		modelo = new DefaultListModel<>();
 		JList<Movimiento> lista = new JList<>(modelo);
 		JScrollPane scroll = new JScrollPane(lista);
-		scroll.setPreferredSize(new Dimension(620, 280));
+		scroll.setPreferredSize(new Dimension(720, 320));
 		wrap.add(scroll, BorderLayout.CENTER);
 
-		totalLbl = new JLabel("Total: $0");
+		totalLbl = new JLabel("Sin movimientos.");
 		wrap.add(totalLbl, BorderLayout.SOUTH);
 		return wrap;
 	}
@@ -121,19 +116,36 @@ public class ResumenView {
 		return bar;
 	}
 
+	private void cargarCuentas() {
+		try {
+			List<Cuenta> cuentas = (cliente == null)
+				? cuentaServicio.listar()
+				: cuentaServicio.listarPorCliente(cliente);
+			for (Cuenta c : cuentas) cuentaCombo.addItem(c);
+		} catch (LeyendoException ex) {
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
 	private void refrescar() {
-		Cuenta cuenta = (Cuenta) cuentaCombo.getSelectedItem();
 		modelo.clear();
-		totalLbl.setText("Total: $0");
-		if (cuenta == null) return;
+		Cuenta cuenta = (Cuenta) cuentaCombo.getSelectedItem();
+		if (cuenta == null) {
+			totalLbl.setText("No hay cuentas para mostrar.");
+			return;
+		}
 		try {
 			List<Movimiento> movs = filtrar(movimientoDao.leerPorCuenta(cuenta));
 			double total = 0;
 			for (Movimiento m : movs) {
 				modelo.addElement(m);
-				total += signo(m) * m.getMonto();
+				total += signo(m.getTipo()) * m.getMonto();
 			}
-			totalLbl.setText("Mostrando " + movs.size() + " movimientos. Balance del período: $" + total);
+			if (movs.isEmpty()) {
+				totalLbl.setText("Sin movimientos para el filtro seleccionado.");
+			} else {
+				totalLbl.setText(movs.size() + " movimientos · Balance del período: $" + total);
+			}
 		} catch (SQLException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
@@ -157,8 +169,8 @@ public class ResumenView {
 		return out;
 	}
 
-	private int signo(Movimiento m) {
-		switch (m.getTipo()) {
+	private int signo(TipoMovimiento tipo) {
+		switch (tipo) {
 			case CREDITO:
 			case TRANSFERENCIA_RECIBIDA:
 			case PAGO_TARJETA:

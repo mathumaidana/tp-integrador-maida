@@ -24,19 +24,11 @@ public class LoginView {
 		try {
 			Usuario usuario = autenticacionServicio.autenticar(username, password);
 			frame.dispose();
-			abrirMenu(usuario);
+			MenuView menu = usuario.crearMenu();
+			menu.alCerrar(LoginView::new);
+			menu.mostrar();
 		} catch (AutenticacionException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error de autenticación", JOptionPane.ERROR_MESSAGE);
 		}
-	}
-
-	private void abrirMenu(Usuario usuario) {
-		MenuView menu = MenuView.crearPara(usuario);
-		menu.alCerrar(this::mostrarLogin);
-		menu.mostrar();
-	}
-
-	private void mostrarLogin() {
-		new LoginView();
 	}
 }

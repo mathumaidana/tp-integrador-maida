@@ -9,8 +9,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import entidades.Administrador;
-import entidades.Cliente;
 import entidades.Usuario;
 
 public abstract class MenuView {
@@ -22,7 +20,7 @@ public abstract class MenuView {
 
 	protected MenuView(Usuario usuario) {
 		this.usuario = usuario;
-		this.frame = new JFrame(resolverTitulo(usuario));
+		this.frame = new JFrame(tituloVentana());
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
 		JPanel root = new JPanel(new BorderLayout(MARGIN, MARGIN));
@@ -34,22 +32,8 @@ public abstract class MenuView {
 		frame.setLocationRelativeTo(null);
 	}
 
-	public static MenuView crearPara(Usuario usuario) {
-		if (usuario instanceof Administrador) {
-			return new MenuAdminView((Administrador) usuario);
-		}
-		if (usuario instanceof Cliente) {
-			return new MenuClienteView((Cliente) usuario);
-		}
-		throw new IllegalArgumentException("Tipo de usuario no soportado: " + usuario.getClass().getName());
-	}
-
 	public void mostrar() {
 		frame.setVisible(true);
-	}
-
-	public JFrame getFrame() {
-		return frame;
 	}
 
 	public void alCerrar(VentanaListener listener) {
@@ -61,32 +45,16 @@ public abstract class MenuView {
 		});
 	}
 
+	protected abstract String tituloVentana();
+
 	protected abstract JPanel crearPanelOpciones();
 
 	protected JLabel crearEncabezado() {
-		return new JLabel(usuario.getNombre() + " " + usuario.getApellido(), JLabel.CENTER);
+		return new JLabel(usuario.getNombreCompleto(), JLabel.CENTER);
 	}
 
 	protected void configurarTamano() {
 		frame.setSize(440, 320);
-	}
-
-	protected Cliente cliente() {
-		return (Cliente) usuario;
-	}
-
-	protected Administrador administrador() {
-		return (Administrador) usuario;
-	}
-
-	private static String resolverTitulo(Usuario usuario) {
-		if (usuario instanceof Administrador) {
-			return "Menú admin";
-		}
-		if (usuario instanceof Cliente) {
-			return "Mini Home Banking - " + usuario.getNombre();
-		}
-		throw new IllegalArgumentException("Tipo de usuario no soportado: " + usuario.getClass().getName());
 	}
 
 	@FunctionalInterface

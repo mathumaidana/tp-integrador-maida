@@ -20,43 +20,44 @@ public class TransferenciaServicio {
 	}
 
 	public void transferir(Cuenta origen, Cuenta destino, Double monto, String descripcion)
-			throws SaldoInsuficienteException, GrabandoException {
+			throws SaldoInsuficienteException, GrabandoException, TransferenciaInvalidaException {
 		if (origen == null || destino == null) {
-			throw new GrabandoException("Origen y destino son obligatorios");
+			throw new TransferenciaInvalidaException("Indicá las cuentas origen y destino.");
 		}
-		if (origen.getId().equals(destino.getId())) {
-			throw new GrabandoException("La cuenta origen y destino no pueden ser la misma");
+		if (origen.esLaMismaQue(destino)) {
+			throw new TransferenciaInvalidaException("No podés transferir a la misma cuenta.");
 		}
-		if (monto == null || monto <= 0) {
-			throw new GrabandoException("El monto tiene que ser mayor a cero");
-		}
-		if (origen.getSaldo() < monto) {
-			throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta origen");
+		if (!origen.mismaMonedaQue(destino)) {
+			throw new TransferenciaInvalidaException(
+				"La moneda de las cuentas no coincide (" + origen.getMoneda() + " vs " + destino.getMoneda() + ").");
 		}
 
 		Double saldoOrigenPrevio = origen.getSaldo();
 		Double saldoDestinoPrevio = destino.getSaldo();
 
+		origen.debitar(monto);
+		destino.acreditar(monto);
+
 		try {
-			origen.setSaldo(saldoOrigenPrevio - monto);
-			destino.setSaldo(saldoDestinoPrevio + monto);
 			cuentaDao.actualizarSaldo(origen.getId(), origen.getSaldo());
 			cuentaDao.actualizarSaldo(destino.getId(), destino.getSaldo());
-
-			Movimiento envio = new Movimiento(null, LocalDateTime.now(), monto,
-				TipoMovimiento.TRANSFERENCIA_ENVIADA,
-				"A " + referenciaCuenta(destino) + (descripcion != null && !descripcion.isEmpty() ? ": " + descripcion : ""),
-				origen);
-			Movimiento recibo = new Movimiento(null, LocalDateTime.now(), monto,
-				TipoMovimiento.TRANSFERENCIA_RECIBIDA,
-				"De " + referenciaCuenta(origen) + (descripcion != null && !descripcion.isEmpty() ? ": " + descripcion : ""),
-				destino);
-			movimientoDao.grabar(envio);
-			movimientoDao.grabar(recibo);
+			movimientoDao.grabar(crearMovimiento(origen, destino, monto, descripcion, true));
+			movimientoDao.grabar(crearMovimiento(destino, origen, monto, descripcion, false));
 		} catch (SQLException e) {
 			compensar(origen, saldoOrigenPrevio, destino, saldoDestinoPrevio);
 			throw new GrabandoException("Error al realizar la transferencia: " + e.getMessage());
 		}
+	}
+
+	private Movimiento crearMovimiento(Cuenta propia, Cuenta otra, Double monto, String descripcion, boolean envio) {
+		String prefijo = envio ? "A " : "De ";
+		String detalle = prefijo + otra.referencia();
+		if (descripcion != null && !descripcion.isEmpty()) {
+			detalle += ": " + descripcion;
+		}
+		return new Movimiento(null, LocalDateTime.now(), monto,
+			envio ? TipoMovimiento.TRANSFERENCIA_ENVIADA : TipoMovimiento.TRANSFERENCIA_RECIBIDA,
+			detalle, propia);
 	}
 
 	private void compensar(Cuenta origen, Double saldoOrigen, Cuenta destino, Double saldoDestino) {
@@ -67,11 +68,5 @@ public class TransferenciaServicio {
 			destino.setSaldo(saldoDestino);
 		} catch (SQLException ignored) {
 		}
-	}
-
-	private String referenciaCuenta(Cuenta c) {
-		if (c.getAlias() != null && !c.getAlias().isEmpty()) return c.getAlias();
-		if (c.getCbu() != null && !c.getCbu().isEmpty()) return c.getCbu();
-		return String.valueOf(c.getId());
 	}
 }

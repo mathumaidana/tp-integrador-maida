@@ -3,27 +3,74 @@ package entidades;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cuenta {
-	private Integer id;
-	private String alias;
-	private String cbu;
-	private Double saldo;
-	private TipoCuenta tipo;
-	private Cliente titular;
-	private List<Movimiento> movimientos;
+import servicio.SaldoInsuficienteException;
 
-	public Cuenta() {
+public abstract class Cuenta {
+	protected Integer id;
+	protected String alias;
+	protected String cbu;
+	protected Double saldo;
+	protected TipoCuenta tipo;
+	protected Cliente titular;
+	protected List<Movimiento> movimientos;
+
+	protected Cuenta() {
 		this.movimientos = new ArrayList<>();
+		this.saldo = 0.0;
 	}
 
-	public Cuenta(Integer id, String alias, String cbu, Double saldo, TipoCuenta tipo, Cliente titular) {
+	protected Cuenta(TipoCuenta tipo) {
+		this();
+		this.tipo = tipo;
+	}
+
+	protected Cuenta(Integer id, String alias, String cbu, Double saldo, TipoCuenta tipo, Cliente titular) {
 		this.id = id;
 		this.alias = alias;
 		this.cbu = cbu;
-		this.saldo = saldo;
+		this.saldo = saldo != null ? saldo : 0.0;
 		this.tipo = tipo;
 		this.titular = titular;
 		this.movimientos = new ArrayList<>();
+	}
+
+	public abstract double saldoMinimo();
+
+	public abstract boolean permiteCheques();
+
+	public Moneda getMoneda() {
+		return tipo != null ? tipo.getMoneda() : null;
+	}
+
+	public boolean mismaMonedaQue(Cuenta otra) {
+		return otra != null && getMoneda() == otra.getMoneda();
+	}
+
+	public boolean esLaMismaQue(Cuenta otra) {
+		return otra != null && id != null && id.equals(otra.getId());
+	}
+
+	public void debitar(Double monto) throws SaldoInsuficienteException {
+		if (monto == null || monto <= 0) {
+			throw new IllegalArgumentException("El monto tiene que ser mayor a cero");
+		}
+		if (saldo - monto < saldoMinimo()) {
+			throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta " + referencia());
+		}
+		this.saldo -= monto;
+	}
+
+	public void acreditar(Double monto) {
+		if (monto == null || monto <= 0) {
+			throw new IllegalArgumentException("El monto tiene que ser mayor a cero");
+		}
+		this.saldo += monto;
+	}
+
+	public String referencia() {
+		if (alias != null && !alias.isEmpty()) return alias;
+		if (cbu != null && !cbu.isEmpty()) return cbu;
+		return String.valueOf(id);
 	}
 
 	public Integer getId() {
@@ -82,12 +129,8 @@ public class Cuenta {
 		this.movimientos = movimientos;
 	}
 
-	public void agregarMovimiento(Movimiento m) {
-		this.movimientos.add(m);
-	}
-
 	@Override
 	public String toString() {
-		return id + " - " + tipo + " - alias: " + alias + " - saldo: " + saldo;
+		return tipo + " " + referencia() + " (saldo $" + saldo + ")";
 	}
 }

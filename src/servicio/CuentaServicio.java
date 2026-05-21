@@ -24,14 +24,8 @@ public class CuentaServicio {
 
 	public void agregar(Cuenta c) throws GrabandoException, CuentaDuplicadaException {
 		try {
-			if (c.getCbu() != null && !c.getCbu().isEmpty()
-					&& cuentaDao.buscarPorCbu(c.getCbu()) != null) {
-				throw new CuentaDuplicadaException("Ya existe una cuenta con CBU '" + c.getCbu() + "'");
-			}
-			if (c.getAlias() != null && !c.getAlias().isEmpty()
-					&& cuentaDao.buscarPorAlias(c.getAlias()) != null) {
-				throw new CuentaDuplicadaException("Ya existe una cuenta con alias '" + c.getAlias() + "'");
-			}
+			validarReferencia(c);
+			chequearUnicidad(c);
 			cuentaDao.grabar(c);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al grabar la cuenta: " + e.getMessage());
@@ -80,18 +74,38 @@ public class CuentaServicio {
 
 	public void modificar(Cuenta c) throws GrabandoException, CuentaInexistenteException, CuentaDuplicadaException {
 		try {
-			Cuenta existente = cuentaDao.leer(c.getId());
-			if (existente == null) {
+			if (cuentaDao.leer(c.getId()) == null) {
 				throw new CuentaInexistenteException("No existe una cuenta con id " + c.getId());
 			}
-			validarCbuAliasUnicosEnEdicion(c);
+			validarReferencia(c);
+			chequearUnicidad(c);
 			cuentaDao.modificar(c);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al modificar la cuenta: " + e.getMessage());
 		}
 	}
 
-	private void validarCbuAliasUnicosEnEdicion(Cuenta c) throws SQLException, CuentaDuplicadaException {
+	public void borrar(Integer id) throws GrabandoException, CuentaInexistenteException {
+		try {
+			if (cuentaDao.leer(id) == null) {
+				throw new CuentaInexistenteException("No existe una cuenta con id " + id);
+			}
+			movimientoDao.borrarPorCuenta(id);
+			cuentaDao.borrar(id);
+		} catch (SQLException e) {
+			throw new GrabandoException("Error al borrar la cuenta: " + e.getMessage());
+		}
+	}
+
+	private void validarReferencia(Cuenta c) throws CuentaDuplicadaException {
+		boolean sinAlias = c.getAlias() == null || c.getAlias().trim().isEmpty();
+		boolean sinCbu = c.getCbu() == null || c.getCbu().trim().isEmpty();
+		if (sinAlias && sinCbu) {
+			throw new CuentaDuplicadaException("Cargá al menos un alias o un CBU para identificar la cuenta.");
+		}
+	}
+
+	private void chequearUnicidad(Cuenta c) throws SQLException, CuentaDuplicadaException {
 		if (c.getCbu() != null && !c.getCbu().isEmpty()) {
 			Cuenta porCbu = cuentaDao.buscarPorCbu(c.getCbu());
 			if (porCbu != null && !porCbu.getId().equals(c.getId())) {
@@ -103,19 +117,6 @@ public class CuentaServicio {
 			if (porAlias != null && !porAlias.getId().equals(c.getId())) {
 				throw new CuentaDuplicadaException("Otra cuenta ya usa el alias '" + c.getAlias() + "'");
 			}
-		}
-	}
-
-	public void borrar(Integer id) throws GrabandoException, CuentaInexistenteException {
-		try {
-			Cuenta existente = cuentaDao.leer(id);
-			if (existente == null) {
-				throw new CuentaInexistenteException("No existe una cuenta con id " + id);
-			}
-			movimientoDao.borrarPorCuenta(id);
-			cuentaDao.borrar(id);
-		} catch (SQLException e) {
-			throw new GrabandoException("Error al borrar la cuenta: " + e.getMessage());
 		}
 	}
 }

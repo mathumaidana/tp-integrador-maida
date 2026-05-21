@@ -24,12 +24,13 @@ import servicio.CuentaServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
 import servicio.SaldoInsuficienteException;
+import servicio.TransferenciaInvalidaException;
 import servicio.TransferenciaServicio;
 
 public class FormularioTransferencia {
 
 	private static final int MARGIN = 12;
-	private static final String[] MODOS_BUSQUEDA = { "Id", "CBU", "Alias" };
+	private static final String[] MODOS_BUSQUEDA = { "CBU", "Alias" };
 
 	private final JFrame frame;
 	private final Cliente cliente;
@@ -40,6 +41,8 @@ public class FormularioTransferencia {
 	private JLabel destinoResueltoLbl;
 	private JTextField montoField;
 	private JTextField descripcionField;
+
+	private Cuenta destinoActual;
 
 	private final CuentaServicio cuentaServicio;
 	private final TransferenciaServicio transferenciaServicio;
@@ -58,7 +61,8 @@ public class FormularioTransferencia {
 		root.add(crearFormulario(), BorderLayout.CENTER);
 		root.add(crearBotonera(), BorderLayout.SOUTH);
 		frame.add(root, BorderLayout.CENTER);
-		frame.setSize(540, 320);
+		frame.setMinimumSize(new Dimension(640, 360));
+		frame.setSize(720, 380);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
@@ -89,7 +93,7 @@ public class FormularioTransferencia {
 
 		grid.add(new JLabel("Cuenta destino:"));
 		destinoResueltoLbl = new JLabel("(usá 'Buscar destino' para validar)");
-		destinoResueltoLbl.setPreferredSize(new Dimension(220, 24));
+		destinoResueltoLbl.setPreferredSize(new Dimension(260, 24));
 		grid.add(destinoResueltoLbl);
 
 		grid.add(new JLabel("Monto:"));
@@ -125,37 +129,46 @@ public class FormularioTransferencia {
 		return bar;
 	}
 
-	private Cuenta buscarDestino() {
+	private void buscarDestino() {
+		destinoActual = null;
+		destinoResueltoLbl.setText("(sin resolver)");
+
+		Cuenta origen = (Cuenta) origenCombo.getSelectedItem();
 		String valor = destinoField.getText().trim();
 		if (valor.isEmpty()) {
-			JOptionPane.showMessageDialog(frame, "Ingresá un valor para buscar el destino",
+			JOptionPane.showMessageDialog(frame, "Ingresá un CBU o alias para buscar el destino",
 				"Aviso", JOptionPane.WARNING_MESSAGE);
-			return null;
+			return;
 		}
 		String modo = (String) modoBusquedaCombo.getSelectedItem();
 		try {
-			Cuenta destino = null;
-			if ("Id".equals(modo)) {
-				destino = cuentaServicio.leer(Integer.valueOf(valor));
-			} else if ("CBU".equals(modo)) {
-				destino = cuentaServicio.buscarPorCbu(valor);
-			} else if ("Alias".equals(modo)) {
-				destino = cuentaServicio.buscarPorAlias(valor);
-			}
+			Cuenta destino = "CBU".equals(modo)
+				? cuentaServicio.buscarPorCbu(valor)
+				: cuentaServicio.buscarPorAlias(valor);
 			if (destino == null) {
 				destinoResueltoLbl.setText("(no encontrada)");
 				JOptionPane.showMessageDialog(frame, "No se encontró ninguna cuenta con ese " + modo,
 					"Aviso", JOptionPane.WARNING_MESSAGE);
-				return null;
+				return;
 			}
-			destinoResueltoLbl.setText(destino.toString());
-			return destino;
-		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(frame, "Id inválido", "Aviso", JOptionPane.WARNING_MESSAGE);
+			if (origen != null && origen.esLaMismaQue(destino)) {
+				destinoResueltoLbl.setText("(es tu misma cuenta)");
+				JOptionPane.showMessageDialog(frame, "No podés transferirte a la misma cuenta.",
+					"Aviso", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			if (origen != null && !origen.mismaMonedaQue(destino)) {
+				destinoResueltoLbl.setText("(moneda distinta: " + destino.getMoneda() + ")");
+				JOptionPane.showMessageDialog(frame,
+					"La cuenta destino opera en " + destino.getMoneda() + " y la origen en " + origen.getMoneda() + ".",
+					"Aviso", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			destinoActual = destino;
+			destinoResueltoLbl.setText(destino.getTipo() + " " + destino.referencia());
 		} catch (LeyendoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		return null;
 	}
 
 	private void ejecutar() {
@@ -165,8 +178,11 @@ public class FormularioTransferencia {
 				"Aviso", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-		Cuenta destino = buscarDestino();
-		if (destino == null) return;
+		if (destinoActual == null) {
+			JOptionPane.showMessageDialog(frame, "Buscá y validá la cuenta destino antes de transferir.",
+				"Aviso", JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		if (montoField.getText().trim().isEmpty()) {
 			JOptionPane.showMessageDialog(frame, "Ingresá el monto", "Aviso", JOptionPane.WARNING_MESSAGE);
 			return;
@@ -179,13 +195,17 @@ public class FormularioTransferencia {
 			return;
 		}
 		try {
-			transferenciaServicio.transferir(origen, destino, monto, descripcionField.getText().trim());
+			transferenciaServicio.transferir(origen, destinoActual, monto, descripcionField.getText().trim());
 			JOptionPane.showMessageDialog(frame,
-				"Transferencia hecha. Saldo origen: " + origen.getSaldo(),
+				"Transferencia hecha. Saldo de tu cuenta: $" + origen.getSaldo(),
 				"Aviso", JOptionPane.INFORMATION_MESSAGE);
 			frame.dispose();
+		} catch (TransferenciaInvalidaException ex) {
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (SaldoInsuficienteException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Saldo", JOptionPane.WARNING_MESSAGE);
+		} catch (IllegalArgumentException ex) {
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}

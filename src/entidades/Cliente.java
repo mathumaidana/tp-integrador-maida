@@ -3,6 +3,9 @@ package entidades;
 import java.util.ArrayList;
 import java.util.List;
 
+import vista.MenuClienteView;
+import vista.MenuView;
+
 public class Cliente extends Usuario {
 	private List<Cuenta> cuentas;
 	private List<Tarjeta> tarjetas;
@@ -22,6 +25,11 @@ public class Cliente extends Usuario {
 	@Override
 	public String getRol() {
 		return "CLIENTE";
+	}
+
+	@Override
+	public MenuView crearMenu() {
+		return new MenuClienteView(this);
 	}
 
 	public List<Cuenta> getCuentas() {

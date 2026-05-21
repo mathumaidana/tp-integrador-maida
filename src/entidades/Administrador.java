@@ -1,6 +1,9 @@
 package entidades;
 
-public class Administrador extends Usuario {
+import vista.MenuAdminView;
+import vista.MenuView;
+
+public class Administrador extends Empleado {
 
 	public Administrador() {
 		super();
@@ -13,5 +16,10 @@ public class Administrador extends Usuario {
 	@Override
 	public String getRol() {
 		return "ADMIN";
+	}
+
+	@Override
+	public MenuView crearMenu() {
+		return new MenuAdminView(this);
 	}
 }

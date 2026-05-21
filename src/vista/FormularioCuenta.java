@@ -217,9 +217,8 @@ public class FormularioCuenta {
 			return;
 		}
 
-		Cuenta cuenta = new Cuenta();
+		Cuenta cuenta = tipo.nuevaCuenta();
 		cuenta.setTitular(titular);
-		cuenta.setTipo(tipo);
 		cuenta.setAlias(alias.isEmpty() ? null : alias);
 		cuenta.setCbu(cbu.isEmpty() ? null : cbu);
 		cuenta.setSaldo(saldo);
