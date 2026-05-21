@@ -13,6 +13,8 @@ import javax.swing.JTextField;
 
 class LoginFrame extends JFrame {
 
+	private static final long serialVersionUID = 1L;
+
 	LoginFrame(BiConsumer<String, String> onLogin, Runnable onCancel) {
 		super("Mini Home Banking - Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

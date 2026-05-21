@@ -1,8 +1,5 @@
 package entidades;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import servicio.SaldoInsuficienteException;
 
 public abstract class Cuenta {
@@ -12,10 +9,8 @@ public abstract class Cuenta {
 	protected Double saldo;
 	protected TipoCuenta tipo;
 	protected Cliente titular;
-	protected List<Movimiento> movimientos;
 
 	protected Cuenta() {
-		this.movimientos = new ArrayList<>();
 		this.saldo = 0.0;
 	}
 
@@ -31,7 +26,6 @@ public abstract class Cuenta {
 		this.saldo = saldo != null ? saldo : 0.0;
 		this.tipo = tipo;
 		this.titular = titular;
-		this.movimientos = new ArrayList<>();
 	}
 
 	public abstract double saldoMinimo();
@@ -119,14 +113,6 @@ public abstract class Cuenta {
 
 	public void setTitular(Cliente titular) {
 		this.titular = titular;
-	}
-
-	public List<Movimiento> getMovimientos() {
-		return movimientos;
-	}
-
-	public void setMovimientos(List<Movimiento> movimientos) {
-		this.movimientos = movimientos;
 	}
 
 	@Override

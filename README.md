@@ -42,4 +42,12 @@ java -cp "bin;lib/*" dao.Main
 
 ## Acceso
 
-Usuario administrador por defecto: **admin** / **admin**. Los clientes se dan de alta desde el menú del administrador.
+Usuario administrador por defecto: **admin** / **admin**.
+
+Roles:
+
+- **Administrador**: alta y baja de empleados. Ve los movimientos del banco a modo de auditoría.
+- **Empleado**: alta y modificación de clientes, cuentas y tarjetas.
+- **Cliente**: opera sus propias cuentas, transferencias y tarjetas.
+
+Para empezar a operar entrá como `admin`, creá un empleado, después logueate como ese empleado y desde ahí cargá los clientes y sus productos.

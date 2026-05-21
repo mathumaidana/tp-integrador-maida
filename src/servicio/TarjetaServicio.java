@@ -80,17 +80,8 @@ public class TarjetaServicio {
 
 	public void debitar(Tarjeta t, Double monto, String descripcion)
 			throws GrabandoException, SaldoInsuficienteException {
-		if (monto == null || monto <= 0) {
-			throw new GrabandoException("El monto tiene que ser mayor a cero");
-		}
-		if (t.getDisponible() < monto) {
-			throw new SaldoInsuficienteException("Disponible insuficiente en la tarjeta");
-		}
+		t.debitar(monto);
 		try {
-			Double nuevoDisp = t.getDisponible() - monto;
-			Double nuevoSaldo = t.getSaldoAPagar() + monto;
-			t.setDisponible(nuevoDisp);
-			t.setSaldoAPagar(nuevoSaldo);
 			tarjetaDao.modificar(t);
 			movimientoDao.grabar(new Movimiento(null, LocalDateTime.now(), monto,
 				TipoMovimiento.DEBITO_TARJETA, descripcion, null, t));
@@ -100,14 +91,8 @@ public class TarjetaServicio {
 	}
 
 	public void pagar(Tarjeta t, Double monto, String descripcion) throws GrabandoException {
-		if (monto == null || monto <= 0) {
-			throw new GrabandoException("El monto tiene que ser mayor a cero");
-		}
+		t.pagar(monto);
 		try {
-			Double nuevoDisp = t.getDisponible() + monto;
-			Double nuevoSaldo = Math.max(0, t.getSaldoAPagar() - monto);
-			t.setDisponible(nuevoDisp);
-			t.setSaldoAPagar(nuevoSaldo);
 			tarjetaDao.modificar(t);
 			movimientoDao.grabar(new Movimiento(null, LocalDateTime.now(), monto,
 				TipoMovimiento.PAGO_TARJETA, descripcion, null, t));

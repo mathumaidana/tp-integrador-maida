@@ -320,6 +320,8 @@ public class FormularioTarjeta {
 			refrescar();
 		} catch (SaldoInsuficienteException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Saldo", JOptionPane.WARNING_MESSAGE);
+		} catch (IllegalArgumentException ex) {
+			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}

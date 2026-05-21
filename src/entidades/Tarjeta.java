@@ -1,5 +1,7 @@
 package entidades;
 
+import servicio.SaldoInsuficienteException;
+
 public class Tarjeta {
 	private Integer id;
 	private String numero;
@@ -8,14 +10,40 @@ public class Tarjeta {
 	private Double saldoAPagar;
 
 	public Tarjeta() {
+		this.disponible = 0.0;
+		this.saldoAPagar = 0.0;
 	}
 
 	public Tarjeta(Integer id, String numero, Cliente titular, Double disponible, Double saldoAPagar) {
 		this.id = id;
 		this.numero = numero;
 		this.titular = titular;
-		this.disponible = disponible;
-		this.saldoAPagar = saldoAPagar;
+		this.disponible = disponible != null ? disponible : 0.0;
+		this.saldoAPagar = saldoAPagar != null ? saldoAPagar : 0.0;
+	}
+
+	public void debitar(Double monto) throws SaldoInsuficienteException {
+		if (monto == null || monto <= 0) {
+			throw new IllegalArgumentException("El monto tiene que ser mayor a cero");
+		}
+		if (disponible < monto) {
+			throw new SaldoInsuficienteException("Disponible insuficiente en la tarjeta " + ultimosCuatro());
+		}
+		this.disponible -= monto;
+		this.saldoAPagar += monto;
+	}
+
+	public void pagar(Double monto) {
+		if (monto == null || monto <= 0) {
+			throw new IllegalArgumentException("El monto tiene que ser mayor a cero");
+		}
+		this.disponible += monto;
+		this.saldoAPagar = Math.max(0.0, this.saldoAPagar - monto);
+	}
+
+	public String ultimosCuatro() {
+		if (numero == null) return "????";
+		return numero.length() >= 4 ? numero.substring(numero.length() - 4) : numero;
 	}
 
 	public Integer getId() {
@@ -60,7 +88,6 @@ public class Tarjeta {
 
 	@Override
 	public String toString() {
-		return id + " - **** " + (numero != null && numero.length() >= 4 ? numero.substring(numero.length() - 4) : numero)
-			+ " - disp: " + disponible + " - a pagar: " + saldoAPagar;
+		return "**** " + ultimosCuatro() + " (disp $" + disponible + " · a pagar $" + saldoAPagar + ")";
 	}
 }

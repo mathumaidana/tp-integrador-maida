@@ -71,12 +71,6 @@ public class MisCuentasView {
 		try {
 			List<Cuenta> cuentas = cuentaServicio.listarPorCliente(cliente);
 			modelo.clear();
-			if (cuentas.isEmpty()) {
-				JOptionPane.showMessageDialog(frame,
-					"No tenés cuentas asignadas.",
-					"Aviso", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
 			for (Cuenta c : cuentas) modelo.addElement(c);
 		} catch (LeyendoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
