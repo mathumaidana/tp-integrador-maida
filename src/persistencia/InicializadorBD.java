@@ -54,24 +54,11 @@ public class InicializadorBD extends BaseH2 {
 		updateDeleteInsertSql(movimientos);
 		updateDeleteInsertSql(tarjetas);
 
-		migrarMovimientos();
-		seedAdmin();
+		seedEmpleadoInicial();
 	}
 
-	private void migrarMovimientos() {
-		ejecutarSilencioso("ALTER TABLE MOVIMIENTOS ADD COLUMN IF NOT EXISTS ID_TARJETA INT");
-		ejecutarSilencioso("ALTER TABLE MOVIMIENTOS ALTER COLUMN ID_CUENTA DROP NOT NULL");
-	}
-
-	private void ejecutarSilencioso(String sql) {
-		try {
-			updateDeleteInsertSql(sql);
-		} catch (SQLException ignored) {
-		}
-	}
-
-	private void seedAdmin() throws SQLException {
-		ResultSet rs = selectSql("SELECT COUNT(*) FROM USUARIOS WHERE ROL = ?", "ADMIN");
+	private void seedEmpleadoInicial() throws SQLException {
+		ResultSet rs = selectSql("SELECT COUNT(*) FROM USUARIOS WHERE ROL = ?", "EMPLEADO");
 		boolean existe = false;
 		try {
 			if (rs.next()) {
@@ -84,7 +71,7 @@ public class InicializadorBD extends BaseH2 {
 		if (!existe) {
 			updateDeleteInsertSql(
 				"INSERT INTO USUARIOS (USERNAME, PASSWORD, NOMBRE, APELLIDO, DNI, ROL) VALUES (?,?,?,?,?,?)",
-				"admin", "admin", "Admin", "Sistema", "00000000", "ADMIN"
+				"admin", "admin", "Admin", "Sistema", "00000000", "EMPLEADO"
 			);
 		}
 	}

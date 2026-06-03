@@ -3,7 +3,6 @@ package servicio;
 import java.sql.SQLException;
 import java.util.List;
 
-import entidades.Administrador;
 import entidades.Empleado;
 import persistencia.EmpleadoDao;
 import persistencia.UsuarioDao;
@@ -42,10 +41,15 @@ public class EmpleadoServicio {
 		}
 	}
 
-	public void modificar(Empleado e) throws GrabandoException, EmpleadoInexistenteException {
+	public void modificar(Empleado e) throws GrabandoException, EmpleadoInexistenteException, EmpleadoExistenteException {
 		try {
 			if (empleadoDao.leer(e.getId()) == null) {
 				throw new EmpleadoInexistenteException("No existe un empleado con id " + e.getId());
+			}
+			entidades.Usuario otro = usuarioDao.buscarPorUsername(e.getUsername());
+			if (otro != null && !otro.getId().equals(e.getId())) {
+				throw new EmpleadoExistenteException(
+					"Ya existe otro usuario con username '" + e.getUsername() + "'");
 			}
 			empleadoDao.modificar(e);
 		} catch (SQLException ex) {
@@ -53,7 +57,7 @@ public class EmpleadoServicio {
 		}
 	}
 
-	public void borrar(Integer id, Administrador sesion)
+	public void borrar(Integer id, Empleado sesion)
 			throws GrabandoException, EmpleadoInexistenteException, OperacionNoPermitidaException {
 		try {
 			if (empleadoDao.leer(id) == null) {

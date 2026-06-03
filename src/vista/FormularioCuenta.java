@@ -31,6 +31,7 @@ import servicio.CuentaInexistenteException;
 import servicio.CuentaServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
+import servicio.SaldoInicialInvalidoException;
 
 public class FormularioCuenta {
 
@@ -234,7 +235,7 @@ public class FormularioCuenta {
 			}
 			limpiarFormulario();
 			refrescarLista();
-		} catch (CuentaDuplicadaException | CuentaInexistenteException ex) {
+		} catch (CuentaDuplicadaException | CuentaInexistenteException | SaldoInicialInvalidoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

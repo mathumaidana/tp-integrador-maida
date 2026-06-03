@@ -28,7 +28,8 @@ public class TarjetaServicio {
 
 	public void agregar(Tarjeta t) throws GrabandoException, TarjetaDuplicadaException {
 		try {
-			if (existeNumero(t.getNumero())) {
+			Tarjeta existente = tarjetaDao.buscarPorNumero(t.getNumero());
+			if (existente != null) {
 				throw new TarjetaDuplicadaException("Ya existe una tarjeta con número '" + t.getNumero() + "'");
 			}
 			tarjetaDao.grabar(t);
@@ -53,11 +54,17 @@ public class TarjetaServicio {
 		}
 	}
 
-	public void modificar(Tarjeta t) throws GrabandoException, TarjetaInexistenteException {
+	public void modificar(Tarjeta t)
+			throws GrabandoException, TarjetaInexistenteException, TarjetaDuplicadaException {
 		try {
 			Tarjeta existente = tarjetaDao.leer(t.getId());
 			if (existente == null) {
 				throw new TarjetaInexistenteException("No existe una tarjeta con id " + t.getId());
+			}
+			Tarjeta otra = tarjetaDao.buscarPorNumero(t.getNumero());
+			if (otra != null && !otra.getId().equals(t.getId())) {
+				throw new TarjetaDuplicadaException(
+					"Otra tarjeta ya usa el número '" + t.getNumero() + "'");
 			}
 			tarjetaDao.modificar(t);
 		} catch (SQLException e) {
@@ -109,11 +116,4 @@ public class TarjetaServicio {
 		}
 	}
 
-	private boolean existeNumero(String numero) throws SQLException {
-		if (numero == null) return false;
-		for (Tarjeta existente : tarjetaDao.leer()) {
-			if (numero.equals(existente.getNumero())) return true;
-		}
-		return false;
-	}
 }

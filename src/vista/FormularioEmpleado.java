@@ -2,7 +2,6 @@ package vista;
 
 import java.util.List;
 
-import entidades.Administrador;
 import entidades.Empleado;
 import persistencia.EmpleadoDao;
 import servicio.EmpleadoServicio;
@@ -11,12 +10,22 @@ import servicio.LeyendoException;
 public class FormularioEmpleado extends FormularioUsuario<Empleado> {
 
 	private final EmpleadoServicio empleadoServicio;
-	private final Administrador sesion;
+	private final Empleado sesion;
 
-	public FormularioEmpleado(Administrador sesion) {
+	public FormularioEmpleado(Empleado sesion) {
 		this.sesion = sesion;
 		this.empleadoServicio = new EmpleadoServicio(new EmpleadoDao());
 		montarVentana();
+	}
+
+	@Override
+	protected boolean puedeEliminar(Empleado seleccionado) {
+		return sesion == null || !sesion.getId().equals(seleccionado.getId());
+	}
+
+	@Override
+	protected String mensajeEliminacionNoPermitida(Empleado seleccionado) {
+		return "No podés borrarte mientras estás logueado.";
 	}
 
 	@Override

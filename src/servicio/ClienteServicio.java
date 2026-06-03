@@ -64,11 +64,16 @@ public class ClienteServicio {
 		}
 	}
 
-	public void modificar(Cliente c) throws GrabandoException, ClienteInexistenteException {
+	public void modificar(Cliente c) throws GrabandoException, ClienteInexistenteException, ClienteExistenteException {
 		try {
 			Cliente existente = clienteDao.leer(c.getId());
 			if (existente == null) {
 				throw new ClienteInexistenteException("No existe un cliente con id " + c.getId());
+			}
+			entidades.Usuario otro = usuarioDao.buscarPorUsername(c.getUsername());
+			if (otro != null && !otro.getId().equals(c.getId())) {
+				throw new ClienteExistenteException(
+					"Ya existe otro usuario con username '" + c.getUsername() + "'");
 			}
 			clienteDao.modificar(c);
 		} catch (SQLException e) {

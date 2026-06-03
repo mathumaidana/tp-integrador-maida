@@ -1,8 +1,12 @@
 package entidades;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Movimiento {
+
+	private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
 	private Integer id;
 	private LocalDateTime fecha;
 	private Double monto;
@@ -87,6 +91,7 @@ public class Movimiento {
 
 	@Override
 	public String toString() {
-		return fecha + "  " + tipo + "  $" + monto + (descripcion != null ? "  -  " + descripcion : "");
+		String fechaFormateada = fecha != null ? fecha.format(FORMATO_FECHA) : "(sin fecha)";
+		return fechaFormateada + "  " + tipo + "  $" + monto + (descripcion != null ? "  -  " + descripcion : "");
 	}
 }

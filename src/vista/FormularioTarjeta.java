@@ -24,6 +24,7 @@ import javax.swing.border.EmptyBorder;
 import entidades.Cliente;
 import entidades.Movimiento;
 import entidades.Tarjeta;
+import entidades.TipoMovimiento;
 import persistencia.ClienteDao;
 import persistencia.MovimientoDao;
 import persistencia.TarjetaDao;
@@ -40,7 +41,7 @@ public class FormularioTarjeta {
 	private static final int MARGIN = 12;
 
 	private final JFrame frame;
-	private final boolean modoAdmin;
+	private final boolean modoEmpleado;
 	private final Cliente clienteFijo;
 
 	private JTextField idField;
@@ -61,27 +62,27 @@ public class FormularioTarjeta {
 
 	public FormularioTarjeta(Cliente cliente) {
 		this.clienteFijo = cliente;
-		this.modoAdmin = (cliente == null);
+		this.modoEmpleado = (cliente == null);
 		this.tarjetaServicio = new TarjetaServicio(new TarjetaDao(), new MovimientoDao());
 		this.clienteServicio = new ClienteServicio(new ClienteDao());
 
-		String titulo = modoAdmin ? "Tarjetas" : "Mis tarjetas";
+		String titulo = modoEmpleado ? "Tarjetas" : "Mis tarjetas";
 		this.frame = new JFrame(titulo);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
 		JPanel root = new JPanel(new BorderLayout(MARGIN, MARGIN));
 		root.setBorder(new EmptyBorder(MARGIN, MARGIN, MARGIN, MARGIN));
-		if (modoAdmin) {
+		if (modoEmpleado) {
 			root.add(crearPanelFormulario(), BorderLayout.NORTH);
 		}
 		root.add(crearPanelLista(), BorderLayout.CENTER);
 		root.add(crearPanelBotones(), BorderLayout.SOUTH);
 		frame.add(root, BorderLayout.CENTER);
-		frame.setMinimumSize(new Dimension(620, modoAdmin ? 520 : 360));
-		frame.setSize(720, modoAdmin ? 580 : 400);
+		frame.setMinimumSize(new Dimension(620, modoEmpleado ? 520 : 360));
+		frame.setSize(720, modoEmpleado ? 580 : 400);
 		frame.setLocationRelativeTo(null);
 
-		if (modoAdmin) cargarTitulares();
+		if (modoEmpleado) cargarTitulares();
 		refrescar();
 		frame.setVisible(true);
 	}
@@ -118,14 +119,14 @@ public class FormularioTarjeta {
 
 	private JPanel crearPanelLista() {
 		JPanel wrap = new JPanel(new BorderLayout());
-		String titulo = modoAdmin ? "Lista" : "Mis tarjetas";
+		String titulo = modoEmpleado ? "Lista" : "Mis tarjetas";
 		wrap.setBorder(BorderFactory.createTitledBorder(titulo));
 
 		modelo = new DefaultListModel<>();
 		lista = new JList<>(modelo);
 		lista.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lista.setVisibleRowCount(8);
-		if (modoAdmin) {
+		if (modoEmpleado) {
 			lista.addListSelectionListener(e -> {
 				if (!e.getValueIsAdjusting() && lista.getSelectedValue() != null) {
 					cargarEnFormulario(lista.getSelectedValue());
@@ -142,7 +143,7 @@ public class FormularioTarjeta {
 		JPanel bar = new JPanel(new BorderLayout(0, 8));
 
 		JPanel acciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
-		if (modoAdmin) {
+		if (modoEmpleado) {
 			JButton limpiar = new JButton("Limpiar");
 			limpiar.addActionListener(e -> limpiarFormulario());
 			JButton grabar = new JButton("Guardar");
@@ -163,7 +164,7 @@ public class FormularioTarjeta {
 		resumen.addActionListener(e -> mostrarResumenMensual());
 		JButton refrescar = new JButton("Refrescar");
 		refrescar.addActionListener(e -> {
-			if (modoAdmin) cargarTitulares();
+			if (modoEmpleado) cargarTitulares();
 			refrescar();
 		});
 		acciones.add(resumen);
@@ -350,15 +351,18 @@ public class FormularioTarjeta {
 			List<Movimiento> movs = tarjetaServicio.resumenMensual(sel, ym);
 			StringBuilder sb = new StringBuilder();
 			sb.append("Resumen de ").append(sel).append("\nMes: ").append(ym).append("\n\n");
-			double total = 0;
 			if (movs.isEmpty()) {
 				sb.append("(sin movimientos en este mes)");
 			} else {
+				double debitos = 0;
+				double pagos = 0;
 				for (Movimiento m : movs) {
 					sb.append(m).append('\n');
-					total += m.getMonto();
+					if (m.getTipo() == TipoMovimiento.DEBITO_TARJETA) debitos += m.getMonto();
+					else if (m.getTipo() == TipoMovimiento.PAGO_TARJETA) pagos += m.getMonto();
 				}
-				sb.append("\nTotal del período: $").append(total);
+				sb.append("\nDébitos: $").append(debitos);
+				sb.append("  ·  Pagos: $").append(pagos);
 			}
 			JOptionPane.showMessageDialog(frame, sb.toString(), "Resumen mensual",
 				JOptionPane.INFORMATION_MESSAGE);
@@ -369,7 +373,7 @@ public class FormularioTarjeta {
 
 	private void refrescar() {
 		try {
-			List<Tarjeta> tarjetas = modoAdmin
+			List<Tarjeta> tarjetas = modoEmpleado
 				? tarjetaServicio.listar()
 				: tarjetaServicio.listarPorCliente(clienteFijo);
 			modelo.clear();

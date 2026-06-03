@@ -28,6 +28,26 @@ public class TarjetaDao extends BaseH2 implements ICrud<Tarjeta> {
 		);
 	}
 
+	public Tarjeta buscarPorNumero(String numero) throws SQLException {
+		String sql = "SELECT ID, NUMERO, ID_TITULAR, DISPONIBLE, SALDO_A_PAGAR FROM TARJETAS WHERE NUMERO = ?";
+		ResultSet rs = selectSql(sql, numero);
+		Tarjeta t = null;
+		Integer idTitular = null;
+		try {
+			if (rs.next()) {
+				t = mapearSinTitular(rs);
+				idTitular = rs.getInt("ID_TITULAR");
+			}
+		} finally {
+			if (rs != null) rs.close();
+			cerrarConexion();
+		}
+		if (t != null && idTitular != null) {
+			t.setTitular(clienteDao.leer(idTitular));
+		}
+		return t;
+	}
+
 	@Override
 	public Tarjeta leer(Integer id) throws SQLException {
 		String sql = "SELECT ID, NUMERO, ID_TITULAR, DISPONIBLE, SALDO_A_PAGAR FROM TARJETAS WHERE ID = ?";

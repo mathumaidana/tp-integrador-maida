@@ -30,7 +30,7 @@ import servicio.TransferenciaServicio;
 public class FormularioTransferencia {
 
 	private static final int MARGIN = 12;
-	private static final String[] MODOS_BUSQUEDA = { "CBU", "Alias" };
+	private static final String[] MODOS_BUSQUEDA = { "Id", "CBU", "Alias" };
 
 	private final JFrame frame;
 	private final Cliente cliente;
@@ -136,15 +136,20 @@ public class FormularioTransferencia {
 		Cuenta origen = (Cuenta) origenCombo.getSelectedItem();
 		String valor = destinoField.getText().trim();
 		if (valor.isEmpty()) {
-			JOptionPane.showMessageDialog(frame, "Ingresá un CBU o alias para buscar el destino",
+			JOptionPane.showMessageDialog(frame, "Ingresá un id, CBU o alias para buscar el destino",
 				"Aviso", JOptionPane.WARNING_MESSAGE);
 			return;
 		}
 		String modo = (String) modoBusquedaCombo.getSelectedItem();
 		try {
-			Cuenta destino = "CBU".equals(modo)
-				? cuentaServicio.buscarPorCbu(valor)
-				: cuentaServicio.buscarPorAlias(valor);
+			Cuenta destino;
+			if ("Id".equals(modo)) {
+				destino = cuentaServicio.leer(Integer.valueOf(valor));
+			} else if ("CBU".equals(modo)) {
+				destino = cuentaServicio.buscarPorCbu(valor);
+			} else {
+				destino = cuentaServicio.buscarPorAlias(valor);
+			}
 			if (destino == null) {
 				destinoResueltoLbl.setText("(no encontrada)");
 				JOptionPane.showMessageDialog(frame, "No se encontró ninguna cuenta con ese " + modo,
@@ -166,6 +171,8 @@ public class FormularioTransferencia {
 			}
 			destinoActual = destino;
 			destinoResueltoLbl.setText(destino.getTipo() + " " + destino.referencia());
+		} catch (NumberFormatException ex) {
+			JOptionPane.showMessageDialog(frame, "Id inválido", "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (LeyendoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}

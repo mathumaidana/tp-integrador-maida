@@ -22,9 +22,11 @@ public class CuentaServicio {
 		this.movimientoDao = movimientoDao;
 	}
 
-	public void agregar(Cuenta c) throws GrabandoException, CuentaDuplicadaException {
+	public void agregar(Cuenta c)
+			throws GrabandoException, CuentaDuplicadaException, SaldoInicialInvalidoException {
 		try {
 			validarReferencia(c);
+			validarSaldoInicial(c);
 			chequearUnicidad(c);
 			cuentaDao.grabar(c);
 		} catch (SQLException e) {
@@ -72,12 +74,14 @@ public class CuentaServicio {
 		}
 	}
 
-	public void modificar(Cuenta c) throws GrabandoException, CuentaInexistenteException, CuentaDuplicadaException {
+	public void modificar(Cuenta c) throws GrabandoException, CuentaInexistenteException,
+			CuentaDuplicadaException, SaldoInicialInvalidoException {
 		try {
 			if (cuentaDao.leer(c.getId()) == null) {
 				throw new CuentaInexistenteException("No existe una cuenta con id " + c.getId());
 			}
 			validarReferencia(c);
+			validarSaldoInicial(c);
 			chequearUnicidad(c);
 			cuentaDao.modificar(c);
 		} catch (SQLException e) {
@@ -94,6 +98,14 @@ public class CuentaServicio {
 			cuentaDao.borrar(id);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al borrar la cuenta: " + e.getMessage());
+		}
+	}
+
+	private void validarSaldoInicial(Cuenta c) throws SaldoInicialInvalidoException {
+		Double saldo = c.getSaldo();
+		if (saldo == null || saldo < c.saldoMinimo()) {
+			throw new SaldoInicialInvalidoException(
+				"El saldo debe ser mayor o igual a " + c.saldoMinimo() + " para una " + c.getTipo() + ".");
 		}
 	}
 

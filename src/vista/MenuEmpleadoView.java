@@ -10,24 +10,30 @@ import entidades.Empleado;
 
 public class MenuEmpleadoView extends MenuView {
 
+	private final Empleado empleado;
+
 	public MenuEmpleadoView(Empleado empleado) {
 		super(empleado);
+		this.empleado = empleado;
 	}
 
 	@Override
 	protected String tituloVentana() {
-		return "Mesa de atención";
+		return "Panel del banco";
 	}
 
 	@Override
 	protected void configurarTamano() {
-		frame.setSize(440, 360);
+		frame.setSize(440, 420);
 	}
 
 	@Override
 	protected JPanel crearPanelOpciones() {
-		JPanel panel = new JPanel(new GridLayout(5, 1, 8, 8));
+		JPanel panel = new JPanel(new GridLayout(6, 1, 8, 8));
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+		JButton empleados = new JButton("Empleados");
+		empleados.addActionListener(e -> new FormularioEmpleado(empleado));
 
 		JButton clientes = new JButton("Clientes");
 		clientes.addActionListener(e -> new FormularioCliente());
@@ -44,6 +50,7 @@ public class MenuEmpleadoView extends MenuView {
 		JButton salir = new JButton("Salir");
 		salir.addActionListener(e -> frame.dispose());
 
+		panel.add(empleados);
 		panel.add(clientes);
 		panel.add(cuentas);
 		panel.add(tarjetas);

@@ -76,20 +76,6 @@ public class ClienteDao extends BaseH2 implements ICrud<Cliente> {
 		updateDeleteInsertSql(sql, id);
 	}
 
-	public Cliente buscarPorUsername(String username) throws SQLException {
-		String sql = "SELECT ID, USERNAME, PASSWORD, NOMBRE, APELLIDO, DNI FROM USUARIOS WHERE USERNAME = ? AND ROL = 'CLIENTE'";
-		ResultSet rs = selectSql(sql, username);
-		try {
-			if (rs.next()) {
-				return mapear(rs);
-			}
-			return null;
-		} finally {
-			if (rs != null) rs.close();
-			cerrarConexion();
-		}
-	}
-
 	private Cliente mapear(ResultSet rs) throws SQLException {
 		return new Cliente(
 			rs.getInt("ID"),
