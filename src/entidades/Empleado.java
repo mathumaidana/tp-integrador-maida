@@ -14,11 +14,6 @@ public class Empleado extends Usuario {
 	}
 
 	@Override
-	public String getRol() {
-		return "EMPLEADO";
-	}
-
-	@Override
 	public MenuView crearMenu() {
 		return new MenuEmpleadoView(this);
 	}
