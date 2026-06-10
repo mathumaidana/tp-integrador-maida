@@ -47,6 +47,7 @@ curl -sSL -o lib/h2-2.2.224.jar https://repo1.maven.org/maven2/com/h2database/h2
 Linux / macOS:
 
 ```bash
+mkdir -p bin
 javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib/*" $(find src -name "*.java")
 java -cp "bin:lib/*" dao.Main
 ```
@@ -54,6 +55,7 @@ java -cp "bin:lib/*" dao.Main
 Windows (PowerShell):
 
 ```powershell
+New-Item -ItemType Directory -Force -Path bin | Out-Null
 $files = (Get-ChildItem -Path src -Recurse -Filter *.java).FullName
 javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib/*" $files
 java -cp "bin;lib/*" dao.Main
