@@ -33,16 +33,24 @@ Las **cuatro entidades persistidas** del modelo son `Usuario`, `Cuenta`, `Tarjet
 
 ## Requisitos
 
-- JDK 8 o superior.
-- Driver de H2 en `lib/h2-2.2.224.jar` (es un Multi-Release JAR compilado contra Java 8, así que funciona con cualquier JDK 8+).
+- **JDK 8 o superior** (no alcanza con el JRE — se necesita `javac`). Verificá con `javac -version`; si el comando no existe, instalá el JDK desde [adoptium.net](https://adoptium.net).
+- Driver de H2 en `lib/h2-2.2.224.jar`.
 
-Descargar el driver desde la raíz del proyecto si no está:
+Descargar el driver si no está (desde la raíz del proyecto):
 
+Linux / macOS:
 ```bash
 curl -sSL -o lib/h2-2.2.224.jar https://repo1.maven.org/maven2/com/h2database/h2/2.2.224/h2-2.2.224.jar
 ```
 
+Windows (PowerShell):
+```powershell
+Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/com/h2database/h2/2.2.224/h2-2.2.224.jar" -OutFile "lib\h2-2.2.224.jar"
+```
+
 ## Compilar y ejecutar
+
+**Importante**: todos los comandos se ejecutan desde la raíz del proyecto (la carpeta que contiene `src/`, `lib/` y `README.md`).
 
 Linux / macOS:
 
@@ -52,13 +60,14 @@ javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib/*" $(find src -name "*
 java -cp "bin:lib/*" dao.Main
 ```
 
-Windows (PowerShell):
+Windows (PowerShell) — primero `cd` a la carpeta del proyecto:
 
 ```powershell
+cd "C:\ruta\a\tp-integrador-maida"
 New-Item -ItemType Directory -Force -Path bin | Out-Null
-$files = (Get-ChildItem -Path src -Recurse -Filter *.java).FullName
-javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib/*" $files
-java -cp "bin;lib/*" dao.Main
+$files = (Get-ChildItem -Path ".\src" -Recurse -Filter *.java).FullName
+javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib\*" $files
+java -cp "bin;lib\*" dao.Main
 ```
 
 La base se persiste en `./data/banco.mv.db`. Para arrancar de cero, borrá la carpeta `data/`.
