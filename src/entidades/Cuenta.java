@@ -7,25 +7,12 @@ public abstract class Cuenta {
 	protected String alias;
 	protected String cbu;
 	protected Double saldo;
-	protected TipoCuenta tipo;
+	protected final TipoCuenta tipo;
 	protected Cliente titular;
 
-	protected Cuenta() {
-		this.saldo = 0.0;
-	}
-
 	protected Cuenta(TipoCuenta tipo) {
-		this();
+		this.saldo = 0.0;
 		this.tipo = tipo;
-	}
-
-	protected Cuenta(Integer id, String alias, String cbu, Double saldo, TipoCuenta tipo, Cliente titular) {
-		this.id = id;
-		this.alias = alias;
-		this.cbu = cbu;
-		this.saldo = saldo != null ? saldo : 0.0;
-		this.tipo = tipo;
-		this.titular = titular;
 	}
 
 	public abstract double saldoMinimo();
@@ -103,10 +90,6 @@ public abstract class Cuenta {
 		return tipo;
 	}
 
-	public void setTipo(TipoCuenta tipo) {
-		this.tipo = tipo;
-	}
-
 	public Cliente getTitular() {
 		return titular;
 	}
@@ -117,6 +100,6 @@ public abstract class Cuenta {
 
 	@Override
 	public String toString() {
-		return tipo + " " + referencia() + " (saldo $" + saldo + ")";
+		return tipo + " " + referencia() + " (saldo $" + String.format("%.2f", saldo) + ")";
 	}
 }

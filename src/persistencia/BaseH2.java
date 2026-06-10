@@ -22,65 +22,67 @@ public abstract class BaseH2 {
 		passwd = "";
 	}
 
-	protected BaseH2(String driver, String url, String username, String passwd) {
-		this.driver = driver;
-		this.url = url;
-		this.username = username;
-		this.passwd = passwd;
-	}
-
-	private final void cargarDriver() {
+	private final void cargarDriver() throws SQLException {
 		try {
 			Class.forName(driver);
 		} catch (ClassNotFoundException e) {
-			System.exit(0);
+			throw new SQLException("No se pudo cargar el driver de la base de datos", e);
 		}
 	}
 
 	private final void obtenerConexion() throws SQLException {
-		try {
-			connection = DriverManager.getConnection(url, username, passwd);
-		} catch (SQLException e) {
-			throw e;
-		}
+		connection = DriverManager.getConnection(url, username, passwd);
 	}
 
 	protected final void cerrarConexion() throws SQLException {
-		try {
-			if (connection != null) connection.close();
-		} catch (SQLException e) {
-			throw e;
-		}
+		if (connection != null) connection.close();
 	}
 
 	protected final int updateDeleteInsertSql(String sql, Object... params) throws SQLException {
-		PreparedStatement s;
-		int count = 0;
 		cargarDriver();
 		obtenerConexion();
 		try {
-			s = preparedStatement_v20(sql, params);
-			count = s.executeUpdate();
+			PreparedStatement s = preparedStatement_v20(sql, params);
+			int count = s.executeUpdate();
 			s.close();
 			return count;
-		} catch (SQLException e) {
-			throw e;
 		} finally {
 			cerrarConexion();
 		}
 	}
 
 	protected final ResultSet selectSql(String sql, Object... params) throws SQLException {
-		ResultSet rs;
 		cargarDriver();
 		obtenerConexion();
-		PreparedStatement s;
 		try {
-			s = preparedStatement_v20(sql, params);
-			rs = s.executeQuery();
-			return rs;
+			PreparedStatement s = preparedStatement_v20(sql, params);
+			return s.executeQuery();
 		} catch (SQLException e) {
+			cerrarConexion();
 			throw e;
+		}
+	}
+
+	protected final void transaccionSql(String[] sqls, Object[][] params) throws SQLException {
+		cargarDriver();
+		obtenerConexion();
+		try {
+			connection.setAutoCommit(false);
+			for (int i = 0; i < sqls.length; i++) {
+				PreparedStatement s = preparedStatement_v20(sqls[i], params[i]);
+				s.executeUpdate();
+				s.close();
+			}
+			connection.commit();
+		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException alRevertir) {
+				e.addSuppressed(alRevertir);
+			}
+			throw e;
+		} finally {
+			cerrarConexion();
 		}
 	}
 

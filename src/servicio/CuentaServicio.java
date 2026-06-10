@@ -5,6 +5,7 @@ import java.util.List;
 
 import entidades.Cliente;
 import entidades.Cuenta;
+import entidades.Movimiento;
 import persistencia.CuentaDao;
 import persistencia.MovimientoDao;
 
@@ -75,17 +76,29 @@ public class CuentaServicio {
 	}
 
 	public void modificar(Cuenta c) throws GrabandoException, CuentaInexistenteException,
-			CuentaDuplicadaException, SaldoInicialInvalidoException {
+			CuentaDuplicadaException, OperacionNoPermitidaException {
 		try {
-			if (cuentaDao.leer(c.getId()) == null) {
+			Cuenta existente = cuentaDao.leer(c.getId());
+			if (existente == null) {
 				throw new CuentaInexistenteException("No existe una cuenta con id " + c.getId());
 			}
+			if (existente.getTipo() != c.getTipo()) {
+				throw new OperacionNoPermitidaException(
+					"No se puede cambiar el tipo de una cuenta existente. Cerrala y abrí una nueva.");
+			}
 			validarReferencia(c);
-			validarSaldoInicial(c);
 			chequearUnicidad(c);
 			cuentaDao.modificar(c);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al modificar la cuenta: " + e.getMessage());
+		}
+	}
+
+	public List<Movimiento> movimientos(Cuenta c) throws LeyendoException {
+		try {
+			return movimientoDao.leerPorCuenta(c);
+		} catch (SQLException e) {
+			throw new LeyendoException("Error al leer los movimientos: " + e.getMessage());
 		}
 	}
 

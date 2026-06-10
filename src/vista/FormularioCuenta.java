@@ -31,6 +31,7 @@ import servicio.CuentaInexistenteException;
 import servicio.CuentaServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
+import servicio.OperacionNoPermitidaException;
 import servicio.SaldoInicialInvalidoException;
 
 public class FormularioCuenta {
@@ -51,6 +52,10 @@ public class FormularioCuenta {
 
 	private final CuentaServicio cuentaServicio;
 	private final ClienteServicio clienteServicio;
+
+	public JFrame getFrame() {
+		return frame;
+	}
 
 	public FormularioCuenta() {
 		this.cuentaServicio = new CuentaServicio(new CuentaDao());
@@ -189,6 +194,9 @@ public class FormularioCuenta {
 		aliasField.setText(c.getAlias() != null ? c.getAlias() : "");
 		cbuField.setText(c.getCbu() != null ? c.getCbu() : "");
 		saldoField.setText(String.valueOf(c.getSaldo()));
+		// El tipo es inmutable y el saldo solo cambia por operatoria (transferencias), no por ABM.
+		tipoCombo.setEnabled(false);
+		saldoField.setEditable(false);
 	}
 
 	private void limpiarFormulario() {
@@ -199,6 +207,8 @@ public class FormularioCuenta {
 		aliasField.setText("");
 		cbuField.setText("");
 		saldoField.setText("0");
+		tipoCombo.setEnabled(true);
+		saldoField.setEditable(true);
 	}
 
 	private void grabarOModificar() {
@@ -235,7 +245,8 @@ public class FormularioCuenta {
 			}
 			limpiarFormulario();
 			refrescarLista();
-		} catch (CuentaDuplicadaException | CuentaInexistenteException | SaldoInicialInvalidoException ex) {
+		} catch (CuentaDuplicadaException | CuentaInexistenteException | SaldoInicialInvalidoException
+				| OperacionNoPermitidaException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

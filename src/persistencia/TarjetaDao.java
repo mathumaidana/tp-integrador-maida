@@ -6,15 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import entidades.Cliente;
+import entidades.Movimiento;
 import entidades.Tarjeta;
 
 public class TarjetaDao extends BaseH2 implements ICrud<Tarjeta> {
 
 	private final ClienteDao clienteDao;
+	private final MovimientoDao movimientoDao;
 
 	public TarjetaDao() {
 		super();
 		this.clienteDao = new ClienteDao();
+		this.movimientoDao = new MovimientoDao();
 	}
 
 	@Override
@@ -111,14 +114,24 @@ public class TarjetaDao extends BaseH2 implements ICrud<Tarjeta> {
 
 	@Override
 	public void modificar(Tarjeta t) throws SQLException {
-		String sql = "UPDATE TARJETAS SET NUMERO = ?, ID_TITULAR = ?, DISPONIBLE = ?, SALDO_A_PAGAR = ? WHERE ID = ?";
+		String sql = "UPDATE TARJETAS SET NUMERO = ?, ID_TITULAR = ? WHERE ID = ?";
 		updateDeleteInsertSql(sql,
 			t.getNumero(),
 			t.getTitular().getId(),
-			t.getDisponible(),
-			t.getSaldoAPagar(),
 			t.getId()
 		);
+	}
+
+	public void registrarOperacion(Tarjeta t, Movimiento m) throws SQLException {
+		String[] sqls = {
+			"UPDATE TARJETAS SET DISPONIBLE = ?, SALDO_A_PAGAR = ? WHERE ID = ?",
+			MovimientoDao.SQL_INSERT
+		};
+		Object[][] params = {
+			{ t.getDisponible(), t.getSaldoAPagar(), t.getId() },
+			movimientoDao.parametros(m)
+		};
+		transaccionSql(sqls, params);
 	}
 
 	@Override

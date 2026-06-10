@@ -76,6 +76,18 @@ public class ClienteDao extends BaseH2 implements ICrud<Cliente> {
 		updateDeleteInsertSql(sql, id);
 	}
 
+	public void borrarEnCascada(Integer id) throws SQLException {
+		String[] sqls = {
+			"DELETE FROM MOVIMIENTOS WHERE ID_CUENTA IN (SELECT ID FROM CUENTAS WHERE ID_TITULAR = ?)",
+			"DELETE FROM MOVIMIENTOS WHERE ID_TARJETA IN (SELECT ID FROM TARJETAS WHERE ID_TITULAR = ?)",
+			"DELETE FROM CUENTAS WHERE ID_TITULAR = ?",
+			"DELETE FROM TARJETAS WHERE ID_TITULAR = ?",
+			"DELETE FROM USUARIOS WHERE ID = ? AND ROL = 'CLIENTE'"
+		};
+		Object[][] params = { { id }, { id }, { id }, { id }, { id } };
+		transaccionSql(sqls, params);
+	}
+
 	private Cliente mapear(ResultSet rs) throws SQLException {
 		return new Cliente(
 			rs.getInt("ID"),

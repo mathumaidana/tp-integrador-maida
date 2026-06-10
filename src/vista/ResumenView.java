@@ -3,7 +3,6 @@ package vista;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.sql.SQLException;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ import entidades.Cuenta;
 import entidades.Movimiento;
 import entidades.TipoMovimiento;
 import persistencia.CuentaDao;
-import persistencia.MovimientoDao;
 import servicio.CuentaServicio;
 import servicio.LeyendoException;
 
@@ -37,16 +35,18 @@ public class ResumenView {
 	private final JFrame frame;
 	private final Cliente cliente;
 	private final CuentaServicio cuentaServicio;
-	private final MovimientoDao movimientoDao;
 	private JComboBox<Cuenta> cuentaCombo;
 	private JTextField mesField;
 	private DefaultListModel<Movimiento> modelo;
 	private JLabel totalLbl;
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	public ResumenView(Cliente cliente) {
 		this.cliente = cliente;
 		this.cuentaServicio = new CuentaServicio(new CuentaDao());
-		this.movimientoDao = new MovimientoDao();
 		this.frame = new JFrame("Movimientos");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setLayout(new BorderLayout());
@@ -135,7 +135,7 @@ public class ResumenView {
 			return;
 		}
 		try {
-			List<Movimiento> movs = filtrar(movimientoDao.leerPorCuenta(cuenta));
+			List<Movimiento> movs = filtrar(cuentaServicio.movimientos(cuenta));
 			double total = 0;
 			for (Movimiento m : movs) {
 				modelo.addElement(m);
@@ -144,9 +144,9 @@ public class ResumenView {
 			if (movs.isEmpty()) {
 				totalLbl.setText("Sin movimientos para el filtro seleccionado.");
 			} else {
-				totalLbl.setText(movs.size() + " movimientos · Balance del período: $" + total);
+				totalLbl.setText(movs.size() + " movimientos · Balance del período: $" + String.format("%.2f", total));
 			}
-		} catch (SQLException ex) {
+		} catch (LeyendoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}

@@ -4,32 +4,20 @@ import java.sql.SQLException;
 import java.util.List;
 
 import entidades.Cliente;
-import entidades.Cuenta;
-import entidades.Tarjeta;
 import persistencia.ClienteDao;
-import persistencia.CuentaDao;
-import persistencia.MovimientoDao;
-import persistencia.TarjetaDao;
 import persistencia.UsuarioDao;
 
 public class ClienteServicio {
 
 	private final ClienteDao clienteDao;
-	private final CuentaDao cuentaDao;
-	private final MovimientoDao movimientoDao;
-	private final TarjetaDao tarjetaDao;
 	private final UsuarioDao usuarioDao;
 
 	public ClienteServicio(ClienteDao clienteDao) {
-		this(clienteDao, new CuentaDao(), new MovimientoDao(), new TarjetaDao(), new UsuarioDao());
+		this(clienteDao, new UsuarioDao());
 	}
 
-	public ClienteServicio(ClienteDao clienteDao, CuentaDao cuentaDao,
-			MovimientoDao movimientoDao, TarjetaDao tarjetaDao, UsuarioDao usuarioDao) {
+	public ClienteServicio(ClienteDao clienteDao, UsuarioDao usuarioDao) {
 		this.clienteDao = clienteDao;
-		this.cuentaDao = cuentaDao;
-		this.movimientoDao = movimientoDao;
-		this.tarjetaDao = tarjetaDao;
 		this.usuarioDao = usuarioDao;
 	}
 
@@ -87,15 +75,7 @@ public class ClienteServicio {
 			if (existente == null) {
 				throw new ClienteInexistenteException("No existe un cliente con id " + id);
 			}
-			for (Cuenta c : cuentaDao.leerPorTitular(id)) {
-				movimientoDao.borrarPorCuenta(c.getId());
-				cuentaDao.borrar(c.getId());
-			}
-			for (Tarjeta t : tarjetaDao.leerPorTitular(id)) {
-				movimientoDao.borrarPorTarjeta(t.getId());
-				tarjetaDao.borrar(t.getId());
-			}
-			clienteDao.borrar(id);
+			clienteDao.borrarEnCascada(id);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al borrar el cliente: " + e.getMessage());
 		}

@@ -41,6 +41,10 @@ public abstract class FormularioUsuario<T extends Usuario> {
 	protected FormularioUsuario() {
 	}
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	protected final void montarVentana() {
 		this.frame = new JFrame(tituloVentana());
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -207,7 +211,7 @@ public abstract class FormularioUsuario<T extends Usuario> {
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(frame, mensajeDe(ex), "Aviso", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
@@ -234,8 +238,12 @@ public abstract class FormularioUsuario<T extends Usuario> {
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		} catch (Exception ex) {
-			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(frame, mensajeDe(ex), "Aviso", JOptionPane.WARNING_MESSAGE);
 		}
+	}
+
+	private String mensajeDe(Exception ex) {
+		return ex.getMessage() != null ? ex.getMessage() : "Ocurrió un error inesperado.";
 	}
 
 	protected void refrescarLista() {

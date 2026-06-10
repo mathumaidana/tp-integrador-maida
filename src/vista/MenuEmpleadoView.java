@@ -33,19 +33,19 @@ public class MenuEmpleadoView extends MenuView {
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		JButton empleados = new JButton("Empleados");
-		empleados.addActionListener(e -> new FormularioEmpleado(empleado));
+		empleados.addActionListener(e -> registrarVentana(new FormularioEmpleado(empleado).getFrame()));
 
 		JButton clientes = new JButton("Clientes");
-		clientes.addActionListener(e -> new FormularioCliente());
+		clientes.addActionListener(e -> registrarVentana(new FormularioCliente().getFrame()));
 
 		JButton cuentas = new JButton("Cuentas");
-		cuentas.addActionListener(e -> new FormularioCuenta());
+		cuentas.addActionListener(e -> registrarVentana(new FormularioCuenta().getFrame()));
 
 		JButton tarjetas = new JButton("Tarjetas");
-		tarjetas.addActionListener(e -> new FormularioTarjeta());
+		tarjetas.addActionListener(e -> registrarVentana(new FormularioTarjeta().getFrame()));
 
 		JButton resumen = new JButton("Movimientos");
-		resumen.addActionListener(e -> new ResumenView(null));
+		resumen.addActionListener(e -> registrarVentana(new ResumenView(null).getFrame()));
 
 		JButton salir = new JButton("Salir");
 		salir.addActionListener(e -> frame.dispose());

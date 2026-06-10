@@ -92,6 +92,7 @@ public class Movimiento {
 	@Override
 	public String toString() {
 		String fechaFormateada = fecha != null ? fecha.format(FORMATO_FECHA) : "(sin fecha)";
-		return fechaFormateada + "  " + tipo + "  $" + monto + (descripcion != null ? "  -  " + descripcion : "");
+		return fechaFormateada + "  " + tipo + "  $" + String.format("%.2f", monto)
+			+ (descripcion != null ? "  -  " + descripcion : "");
 	}
 }

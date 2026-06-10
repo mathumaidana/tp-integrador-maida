@@ -87,23 +87,29 @@ public class TarjetaServicio {
 
 	public void debitar(Tarjeta t, Double monto, String descripcion)
 			throws GrabandoException, SaldoInsuficienteException {
+		Double disponiblePrevio = t.getDisponible();
+		Double saldoAPagarPrevio = t.getSaldoAPagar();
 		t.debitar(monto);
 		try {
-			tarjetaDao.modificar(t);
-			movimientoDao.grabar(new Movimiento(null, LocalDateTime.now(), monto,
+			tarjetaDao.registrarOperacion(t, new Movimiento(null, LocalDateTime.now(), monto,
 				TipoMovimiento.DEBITO_TARJETA, descripcion, null, t));
 		} catch (SQLException e) {
+			t.setDisponible(disponiblePrevio);
+			t.setSaldoAPagar(saldoAPagarPrevio);
 			throw new GrabandoException("Error al registrar el débito de tarjeta: " + e.getMessage());
 		}
 	}
 
 	public void pagar(Tarjeta t, Double monto, String descripcion) throws GrabandoException {
+		Double disponiblePrevio = t.getDisponible();
+		Double saldoAPagarPrevio = t.getSaldoAPagar();
 		t.pagar(monto);
 		try {
-			tarjetaDao.modificar(t);
-			movimientoDao.grabar(new Movimiento(null, LocalDateTime.now(), monto,
+			tarjetaDao.registrarOperacion(t, new Movimiento(null, LocalDateTime.now(), monto,
 				TipoMovimiento.PAGO_TARJETA, descripcion, null, t));
 		} catch (SQLException e) {
+			t.setDisponible(disponiblePrevio);
+			t.setSaldoAPagar(saldoAPagarPrevio);
 			throw new GrabandoException("Error al registrar el pago de tarjeta: " + e.getMessage());
 		}
 	}

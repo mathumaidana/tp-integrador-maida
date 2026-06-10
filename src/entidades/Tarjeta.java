@@ -14,14 +14,6 @@ public class Tarjeta {
 		this.saldoAPagar = 0.0;
 	}
 
-	public Tarjeta(Integer id, String numero, Cliente titular, Double disponible, Double saldoAPagar) {
-		this.id = id;
-		this.numero = numero;
-		this.titular = titular;
-		this.disponible = disponible != null ? disponible : 0.0;
-		this.saldoAPagar = saldoAPagar != null ? saldoAPagar : 0.0;
-	}
-
 	public void debitar(Double monto) throws SaldoInsuficienteException {
 		if (monto == null || monto <= 0) {
 			throw new IllegalArgumentException("El monto tiene que ser mayor a cero");
@@ -88,6 +80,7 @@ public class Tarjeta {
 
 	@Override
 	public String toString() {
-		return "**** " + ultimosCuatro() + " (disp $" + disponible + " · a pagar $" + saldoAPagar + ")";
+		return "**** " + ultimosCuatro() + " (disp $" + String.format("%.2f", disponible)
+			+ " · a pagar $" + String.format("%.2f", saldoAPagar) + ")";
 	}
 }

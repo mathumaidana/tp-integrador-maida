@@ -17,21 +17,26 @@ public class MovimientoDao extends BaseH2 {
 
 	private static final String COLS = "ID, FECHA, MONTO, TIPO, DESCRIPCION, ID_CUENTA, ID_TARJETA";
 
+	static final String SQL_INSERT = "INSERT INTO MOVIMIENTOS (FECHA, MONTO, TIPO, DESCRIPCION, ID_CUENTA, ID_TARJETA) "
+		+ "VALUES (?, ?, ?, ?, ?, ?)";
+
 	public MovimientoDao() {
 		super();
 	}
 
-	public void grabar(Movimiento m) throws SQLException {
-		String sql = "INSERT INTO MOVIMIENTOS (FECHA, MONTO, TIPO, DESCRIPCION, ID_CUENTA, ID_TARJETA) "
-			+ "VALUES (?, ?, ?, ?, ?, ?)";
-		updateDeleteInsertSql(sql,
+	Object[] parametros(Movimiento m) {
+		return new Object[] {
 			Timestamp.valueOf(m.getFecha()).toString(),
 			m.getMonto(),
 			m.getTipo().name(),
 			m.getDescripcion(),
 			m.getCuenta() != null ? m.getCuenta().getId() : null,
 			m.getTarjeta() != null ? m.getTarjeta().getId() : null
-		);
+		};
+	}
+
+	public void grabar(Movimiento m) throws SQLException {
+		updateDeleteInsertSql(SQL_INSERT, parametros(m));
 	}
 
 	public List<Movimiento> leerPorCuenta(Cuenta cuenta) throws SQLException {
@@ -42,23 +47,6 @@ public class MovimientoDao extends BaseH2 {
 			while (rs.next()) {
 				Movimiento m = mapearSinRelaciones(rs);
 				m.setCuenta(cuenta);
-				lista.add(m);
-			}
-		} finally {
-			if (rs != null) rs.close();
-			cerrarConexion();
-		}
-		return lista;
-	}
-
-	public List<Movimiento> leerPorTarjeta(Tarjeta tarjeta) throws SQLException {
-		String sql = "SELECT " + COLS + " FROM MOVIMIENTOS WHERE ID_TARJETA = ? ORDER BY FECHA DESC";
-		ResultSet rs = selectSql(sql, tarjeta.getId());
-		List<Movimiento> lista = new ArrayList<>();
-		try {
-			while (rs.next()) {
-				Movimiento m = mapearSinRelaciones(rs);
-				m.setTarjeta(tarjeta);
 				lista.add(m);
 			}
 		} finally {

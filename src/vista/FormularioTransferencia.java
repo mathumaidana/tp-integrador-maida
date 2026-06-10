@@ -19,7 +19,7 @@ import javax.swing.border.EmptyBorder;
 import entidades.Cliente;
 import entidades.Cuenta;
 import persistencia.CuentaDao;
-import persistencia.MovimientoDao;
+import persistencia.TransferenciaDao;
 import servicio.CuentaServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
@@ -47,11 +47,14 @@ public class FormularioTransferencia {
 	private final CuentaServicio cuentaServicio;
 	private final TransferenciaServicio transferenciaServicio;
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	public FormularioTransferencia(Cliente cliente) {
 		this.cliente = cliente;
-		CuentaDao cuentaDao = new CuentaDao();
-		this.cuentaServicio = new CuentaServicio(cuentaDao);
-		this.transferenciaServicio = new TransferenciaServicio(cuentaDao, new MovimientoDao());
+		this.cuentaServicio = new CuentaServicio(new CuentaDao());
+		this.transferenciaServicio = new TransferenciaServicio(new TransferenciaDao());
 
 		this.frame = new JFrame("Transferencias");
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -81,6 +84,11 @@ public class FormularioTransferencia {
 		} catch (LeyendoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
+		// Si cambia el origen, el destino validado deja de valer: hay que volver a buscarlo.
+		origenCombo.addActionListener(e -> {
+			destinoActual = null;
+			destinoResueltoLbl.setText("(usá 'Buscar destino' para validar)");
+		});
 		grid.add(origenCombo);
 
 		grid.add(new JLabel("Buscar destino por:"));
@@ -204,7 +212,7 @@ public class FormularioTransferencia {
 		try {
 			transferenciaServicio.transferir(origen, destinoActual, monto, descripcionField.getText().trim());
 			JOptionPane.showMessageDialog(frame,
-				"Transferencia hecha. Saldo de tu cuenta: $" + origen.getSaldo(),
+				"Transferencia hecha. Saldo de tu cuenta: $" + String.format("%.2f", origen.getSaldo()),
 				"Aviso", JOptionPane.INFORMATION_MESSAGE);
 			frame.dispose();
 		} catch (TransferenciaInvalidaException ex) {

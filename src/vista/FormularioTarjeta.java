@@ -56,6 +56,10 @@ public class FormularioTarjeta {
 	private final TarjetaServicio tarjetaServicio;
 	private final ClienteServicio clienteServicio;
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	public FormularioTarjeta() {
 		this(null);
 	}
@@ -211,6 +215,9 @@ public class FormularioTarjeta {
 		numeroField.setText(t.getNumero());
 		disponibleField.setText(String.valueOf(t.getDisponible()));
 		saldoAPagarField.setText(String.valueOf(t.getSaldoAPagar()));
+		// Los saldos solo cambian con Debitar/Pagar (que dejan Movimiento), no por ABM.
+		disponibleField.setEditable(false);
+		saldoAPagarField.setEditable(false);
 	}
 
 	private void limpiarFormulario() {
@@ -220,6 +227,8 @@ public class FormularioTarjeta {
 		numeroField.setText("");
 		disponibleField.setText("0");
 		saldoAPagarField.setText("0");
+		disponibleField.setEditable(true);
+		saldoAPagarField.setEditable(true);
 	}
 
 	private Tarjeta tomarTarjetaDelFormulario() {
@@ -318,6 +327,7 @@ public class FormularioTarjeta {
 				JOptionPane.showMessageDialog(frame, "Pago registrado.",
 					"Aviso", JOptionPane.INFORMATION_MESSAGE);
 			}
+			limpiarFormulario();
 			refrescar();
 		} catch (SaldoInsuficienteException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Saldo", JOptionPane.WARNING_MESSAGE);
@@ -361,8 +371,8 @@ public class FormularioTarjeta {
 					if (m.getTipo() == TipoMovimiento.DEBITO_TARJETA) debitos += m.getMonto();
 					else if (m.getTipo() == TipoMovimiento.PAGO_TARJETA) pagos += m.getMonto();
 				}
-				sb.append("\nDébitos: $").append(debitos);
-				sb.append("  ·  Pagos: $").append(pagos);
+				sb.append("\nDébitos: $").append(String.format("%.2f", debitos));
+				sb.append("  ·  Pagos: $").append(String.format("%.2f", pagos));
 			}
 			JOptionPane.showMessageDialog(frame, sb.toString(), "Resumen mensual",
 				JOptionPane.INFORMATION_MESSAGE);

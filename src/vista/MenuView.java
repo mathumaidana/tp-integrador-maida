@@ -3,6 +3,8 @@ package vista;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,6 +19,7 @@ public abstract class MenuView {
 
 	protected final Usuario usuario;
 	protected final JFrame frame;
+	private final List<JFrame> ventanasHijas = new ArrayList<>();
 
 	protected MenuView(Usuario usuario) {
 		this.usuario = usuario;
@@ -30,6 +33,24 @@ public abstract class MenuView {
 		frame.add(root, BorderLayout.CENTER);
 		configurarTamano();
 		frame.setLocationRelativeTo(null);
+		// Al cerrar el menú (logout) no puede quedar ninguna ventana de la sesión abierta.
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				cerrarVentanasHijas();
+			}
+		});
+	}
+
+	protected void registrarVentana(JFrame ventana) {
+		ventanasHijas.add(ventana);
+	}
+
+	private void cerrarVentanasHijas() {
+		for (JFrame ventana : ventanasHijas) {
+			ventana.dispose();
+		}
+		ventanasHijas.clear();
 	}
 
 	public void mostrar() {

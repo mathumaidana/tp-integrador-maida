@@ -30,6 +30,10 @@ public class MisCuentasView {
 	private final CuentaServicio cuentaServicio;
 	private DefaultListModel<Cuenta> modelo;
 
+	public JFrame getFrame() {
+		return frame;
+	}
+
 	public MisCuentasView(Cliente cliente) {
 		this.cliente = cliente;
 		this.cuentaServicio = new CuentaServicio(new CuentaDao());

@@ -28,16 +28,16 @@ public class MenuClienteView extends MenuView {
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		JButton cuentas = new JButton("Mis cuentas");
-		cuentas.addActionListener(e -> new MisCuentasView(cliente));
+		cuentas.addActionListener(e -> registrarVentana(new MisCuentasView(cliente).getFrame()));
 
 		JButton movimientos = new JButton("Movimientos");
-		movimientos.addActionListener(e -> new ResumenView(cliente));
+		movimientos.addActionListener(e -> registrarVentana(new ResumenView(cliente).getFrame()));
 
 		JButton transferir = new JButton("Transferencias");
-		transferir.addActionListener(e -> new FormularioTransferencia(cliente));
+		transferir.addActionListener(e -> registrarVentana(new FormularioTransferencia(cliente).getFrame()));
 
 		JButton tarjetas = new JButton("Mis tarjetas");
-		tarjetas.addActionListener(e -> new FormularioTarjeta(cliente));
+		tarjetas.addActionListener(e -> registrarVentana(new FormularioTarjeta(cliente).getFrame()));
 
 		JButton salir = new JButton("Salir");
 		salir.addActionListener(e -> frame.dispose());

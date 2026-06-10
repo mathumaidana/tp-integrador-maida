@@ -38,6 +38,9 @@ public class UsuarioDao extends BaseH2 {
 		if ("EMPLEADO".equals(rol)) {
 			return new Empleado(id, username, password, nombre, apellido, dni);
 		}
-		return new Cliente(id, username, password, nombre, apellido, dni);
+		if ("CLIENTE".equals(rol)) {
+			return new Cliente(id, username, password, nombre, apellido, dni);
+		}
+		throw new SQLException("Rol desconocido en USUARIOS: " + rol);
 	}
 }

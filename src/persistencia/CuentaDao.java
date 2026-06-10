@@ -71,12 +71,10 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 
 	@Override
 	public void modificar(Cuenta c) throws SQLException {
-		String sql = "UPDATE CUENTAS SET ALIAS = ?, CBU = ?, SALDO = ?, TIPO = ?, ID_TITULAR = ? WHERE ID = ?";
+		String sql = "UPDATE CUENTAS SET ALIAS = ?, CBU = ?, ID_TITULAR = ? WHERE ID = ?";
 		updateDeleteInsertSql(sql,
 			c.getAlias(),
 			c.getCbu(),
-			c.getSaldo(),
-			c.getTipo().name(),
 			c.getTitular().getId(),
 			c.getId()
 		);

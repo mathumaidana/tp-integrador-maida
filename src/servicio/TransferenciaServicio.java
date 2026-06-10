@@ -6,17 +6,14 @@ import java.time.LocalDateTime;
 import entidades.Cuenta;
 import entidades.Movimiento;
 import entidades.TipoMovimiento;
-import persistencia.CuentaDao;
-import persistencia.MovimientoDao;
+import persistencia.TransferenciaDao;
 
 public class TransferenciaServicio {
 
-	private final CuentaDao cuentaDao;
-	private final MovimientoDao movimientoDao;
+	private final TransferenciaDao transferenciaDao;
 
-	public TransferenciaServicio(CuentaDao cuentaDao, MovimientoDao movimientoDao) {
-		this.cuentaDao = cuentaDao;
-		this.movimientoDao = movimientoDao;
+	public TransferenciaServicio(TransferenciaDao transferenciaDao) {
+		this.transferenciaDao = transferenciaDao;
 	}
 
 	public void transferir(Cuenta origen, Cuenta destino, Double monto, String descripcion)
@@ -25,7 +22,7 @@ public class TransferenciaServicio {
 			throw new TransferenciaInvalidaException("Indicá las cuentas origen y destino.");
 		}
 		if (origen.esLaMismaQue(destino)) {
-			throw new TransferenciaInvalidaException("No podés transferir a la misma cuenta.");
+			throw new TransferenciaInvalidaException("No podés transferirte a la misma cuenta.");
 		}
 		if (!origen.mismaMonedaQue(destino)) {
 			throw new TransferenciaInvalidaException(
@@ -39,12 +36,12 @@ public class TransferenciaServicio {
 		destino.acreditar(monto);
 
 		try {
-			cuentaDao.actualizarSaldo(origen.getId(), origen.getSaldo());
-			cuentaDao.actualizarSaldo(destino.getId(), destino.getSaldo());
-			movimientoDao.grabar(crearMovimiento(origen, destino, monto, descripcion, true));
-			movimientoDao.grabar(crearMovimiento(destino, origen, monto, descripcion, false));
+			transferenciaDao.transferir(origen.getId(), origen.getSaldo(), destino.getId(), destino.getSaldo(),
+				crearMovimiento(origen, destino, monto, descripcion, true),
+				crearMovimiento(destino, origen, monto, descripcion, false));
 		} catch (SQLException e) {
-			compensar(origen, saldoOrigenPrevio, destino, saldoDestinoPrevio);
+			origen.setSaldo(saldoOrigenPrevio);
+			destino.setSaldo(saldoDestinoPrevio);
 			throw new GrabandoException("Error al realizar la transferencia: " + e.getMessage());
 		}
 	}
@@ -58,15 +55,5 @@ public class TransferenciaServicio {
 		return new Movimiento(null, LocalDateTime.now(), monto,
 			envio ? TipoMovimiento.TRANSFERENCIA_ENVIADA : TipoMovimiento.TRANSFERENCIA_RECIBIDA,
 			detalle, propia);
-	}
-
-	private void compensar(Cuenta origen, Double saldoOrigen, Cuenta destino, Double saldoDestino) {
-		try {
-			cuentaDao.actualizarSaldo(origen.getId(), saldoOrigen);
-			cuentaDao.actualizarSaldo(destino.getId(), saldoDestino);
-			origen.setSaldo(saldoOrigen);
-			destino.setSaldo(saldoDestino);
-		} catch (SQLException ignored) {
-		}
 	}
 }
