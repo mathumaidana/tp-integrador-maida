@@ -18,7 +18,7 @@ Autor: Matheo Maidana.
 
 ```
 src/
-├── dao/Main.java        Punto de entrada (inicializa H2 y abre el login).
+├── app/Main.java        Punto de entrada (inicializa H2 y abre el login).
 ├── entidades/           Modelo de dominio.
 │   ├── Usuario (abstract) → Empleado, Cliente
 │   ├── Cuenta  (abstract) → CajaAhorro, CuentaCorriente
@@ -57,7 +57,7 @@ Linux / macOS:
 ```bash
 mkdir -p bin
 javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib/*" $(find src -name "*.java")
-java -cp "bin:lib/*" dao.Main
+java -cp "bin:lib/*" app.Main
 ```
 
 Windows (PowerShell) — primero `cd` a la carpeta del proyecto:
@@ -67,7 +67,7 @@ cd "C:\ruta\a\tp-integrador-maida"
 New-Item -ItemType Directory -Force -Path bin | Out-Null
 $files = (Get-ChildItem -Path ".\src" -Recurse -Filter *.java).FullName
 javac -source 8 -target 8 -encoding UTF-8 -d bin -cp "lib\*" $files
-java -cp "bin;lib\*" dao.Main
+java -cp "bin;lib\*" app.Main
 ```
 
 La base se persiste en `./data/banco.mv.db`. Para arrancar de cero, borrá la carpeta `data/`.
