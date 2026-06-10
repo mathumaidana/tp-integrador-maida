@@ -1,13 +1,13 @@
-# Mini Home Banking — TP Integrador POO
+# Mini Home Banking
 
-Trabajo Práctico Integrador de Programación Orientada a Objetos (Universidad de Palermo). Implementa el **Tema 2: Mini home banking** del enunciado: aplicación de escritorio en Java + Swing con persistencia local en una base H2 embebida.
+Aplicación de escritorio en Java + Swing con persistencia local en una base H2 embebida.
 
 Autor: Matheo Maidana.
 
 ## Funcionalidad
 
 - Administración de usuarios con dos perfiles:
-  - **Empleado** (el empleado del banco mencionado en la consigna): ABM de otros empleados (sin poder borrarse a sí mismo), ABM de clientes, cuentas y tarjetas, registración de débitos y pagos de tarjeta, y vista de auditoría sobre todos los movimientos.
+  - **Empleado**: ABM de otros empleados (sin poder borrarse a sí mismo), ABM de clientes, cuentas y tarjetas, registración de débitos y pagos de tarjeta, y vista de auditoría sobre todos los movimientos.
   - **Cliente**: ve sus cuentas con saldo, opera transferencias, consulta sus movimientos filtrables por mes y ve sus tarjetas con resumen mensual.
 - Cuentas en tres modalidades: caja de ahorro en pesos, caja de ahorro en dólares y cuenta corriente (con acuerdo de giro al descubierto fijo de $50.000). El saldo inicial se valida contra el mínimo del tipo de cuenta.
 - Transferencias entre cuentas: la cuenta origen se elige de una lista propia; la destino se busca por id, CBU o alias. Se validan misma moneda, distintas cuentas y saldo suficiente. El saldo del destino nunca se muestra.
@@ -29,7 +29,7 @@ src/
 └── vista/               Pantallas Swing (login, menús por rol, ABMs, transferencias, resumen).
 ```
 
-Las **cuatro entidades persistidas** del modelo son `Usuario`, `Cuenta`, `Tarjeta` y `Movimiento` (la consigna pide entre 4 y 6). El resto del paquete `entidades` son subclases o enums que refinan esas entidades vía herencia/polimorfismo.
+Las **cuatro entidades persistidas** del modelo son `Usuario`, `Cuenta`, `Tarjeta` y `Movimiento`. El resto del paquete `entidades` son subclases o enums que refinan esas entidades vía herencia/polimorfismo.
 
 ## Requisitos
 
@@ -73,4 +73,4 @@ Flujo sugerido para una demo:
 
 ## Persistencia
 
-La infraestructura JDBC (`BaseH2`, patrón DAO con `ICrud<T>`, excepciones `GrabandoException` y `LeyendoException`) está basada en el template "Archivos y BD Swing" entregado por la cátedra, adaptado al dominio del TP. El esquema de tablas, las relaciones y el mapeo polimórfico (`Usuario` por rol, `Cuenta` por tipo) son propios del proyecto. No hay migraciones: las tablas se crean con `CREATE TABLE IF NOT EXISTS` y, para reiniciar, se borra la carpeta `data/`.
+La infraestructura JDBC usa `BaseH2` (conexión y ejecución de statements), el patrón DAO con `ICrud<T>`, y excepciones tipadas `GrabandoException` / `LeyendoException`. El esquema de tablas, las relaciones y el mapeo polimórfico (`Usuario` por rol, `Cuenta` por tipo) son propios del proyecto. No hay migraciones: las tablas se crean con `CREATE TABLE IF NOT EXISTS` y, para reiniciar, se borra la carpeta `data/`.
