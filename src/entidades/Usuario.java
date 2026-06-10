@@ -22,8 +22,6 @@ public abstract class Usuario {
 		this.dni = dni;
 	}
 
-	public abstract String getRol();
-
 	public abstract MenuView crearMenu();
 
 	public boolean autenticaCon(String password) {
