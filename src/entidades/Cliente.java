@@ -14,11 +14,6 @@ public class Cliente extends Usuario {
 	}
 
 	@Override
-	public String getRol() {
-		return "CLIENTE";
-	}
-
-	@Override
 	public MenuView crearMenu() {
 		return new MenuClienteView(this);
 	}
