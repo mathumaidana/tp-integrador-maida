@@ -134,6 +134,15 @@ public class TarjetaDao extends BaseH2 implements ICrud<Tarjeta> {
 		transaccionSql(sqls, params);
 	}
 
+	public void borrarEnCascada(Integer id) throws SQLException {
+		String[] sqls = {
+			"DELETE FROM MOVIMIENTOS WHERE ID_TARJETA = ?",
+			"DELETE FROM TARJETAS WHERE ID = ?"
+		};
+		Object[][] params = { { id }, { id } };
+		transaccionSql(sqls, params);
+	}
+
 	@Override
 	public void borrar(Integer id) throws SQLException {
 		String sql = "DELETE FROM TARJETAS WHERE ID = ?";

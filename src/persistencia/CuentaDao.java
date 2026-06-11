@@ -84,6 +84,15 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 		updateDeleteInsertSql("UPDATE CUENTAS SET SALDO = ? WHERE ID = ?", saldo, idCuenta);
 	}
 
+	public void borrarEnCascada(Integer id) throws SQLException {
+		String[] sqls = {
+			"DELETE FROM MOVIMIENTOS WHERE ID_CUENTA = ?",
+			"DELETE FROM CUENTAS WHERE ID = ?"
+		};
+		Object[][] params = { { id }, { id } };
+		transaccionSql(sqls, params);
+	}
+
 	@Override
 	public void borrar(Integer id) throws SQLException {
 		updateDeleteInsertSql("DELETE FROM CUENTAS WHERE ID = ?", id);

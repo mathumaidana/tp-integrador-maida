@@ -44,6 +44,12 @@ public abstract class MenuView {
 
 	protected void registrarVentana(JFrame ventana) {
 		ventanasHijas.add(ventana);
+		ventana.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				ventanasHijas.remove(ventana);
+			}
+		});
 	}
 
 	private void cerrarVentanasHijas() {

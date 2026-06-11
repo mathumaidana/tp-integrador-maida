@@ -78,8 +78,7 @@ public class TarjetaServicio {
 			if (existente == null) {
 				throw new TarjetaInexistenteException("No existe una tarjeta con id " + id);
 			}
-			movimientoDao.borrarPorTarjeta(id);
-			tarjetaDao.borrar(id);
+			tarjetaDao.borrarEnCascada(id);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al borrar la tarjeta: " + e.getMessage());
 		}

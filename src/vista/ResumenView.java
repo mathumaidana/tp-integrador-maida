@@ -171,7 +171,6 @@ public class ResumenView {
 
 	private int signo(TipoMovimiento tipo) {
 		switch (tipo) {
-			case CREDITO:
 			case TRANSFERENCIA_RECIBIDA:
 			case PAGO_TARJETA:
 				return 1;

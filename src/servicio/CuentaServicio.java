@@ -107,8 +107,7 @@ public class CuentaServicio {
 			if (cuentaDao.leer(id) == null) {
 				throw new CuentaInexistenteException("No existe una cuenta con id " + id);
 			}
-			movimientoDao.borrarPorCuenta(id);
-			cuentaDao.borrar(id);
+			cuentaDao.borrarEnCascada(id);
 		} catch (SQLException e) {
 			throw new GrabandoException("Error al borrar la cuenta: " + e.getMessage());
 		}
