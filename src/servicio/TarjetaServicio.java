@@ -7,6 +7,7 @@ import java.util.List;
 
 import entidades.Cliente;
 import entidades.Movimiento;
+import entidades.SaldoInsuficienteException;
 import entidades.Tarjeta;
 import entidades.TipoMovimiento;
 import persistencia.MovimientoDao;

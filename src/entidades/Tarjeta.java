@@ -1,6 +1,5 @@
 package entidades;
 
-import servicio.SaldoInsuficienteException;
 
 public class Tarjeta {
 	private Integer id;

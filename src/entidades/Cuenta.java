@@ -1,6 +1,5 @@
 package entidades;
 
-import servicio.SaldoInsuficienteException;
 
 public abstract class Cuenta {
 	protected Integer id;

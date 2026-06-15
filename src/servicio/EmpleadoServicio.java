@@ -5,18 +5,19 @@ import java.util.List;
 
 import entidades.Empleado;
 import persistencia.EmpleadoDao;
+import persistencia.ICrud;
 import persistencia.UsuarioDao;
 
 public class EmpleadoServicio {
 
-	private final EmpleadoDao empleadoDao;
+	private final ICrud<Empleado> empleadoDao;
 	private final UsuarioDao usuarioDao;
 
 	public EmpleadoServicio(EmpleadoDao empleadoDao) {
 		this(empleadoDao, new UsuarioDao());
 	}
 
-	public EmpleadoServicio(EmpleadoDao empleadoDao, UsuarioDao usuarioDao) {
+	public EmpleadoServicio(ICrud<Empleado> empleadoDao, UsuarioDao usuarioDao) {
 		this.empleadoDao = empleadoDao;
 		this.usuarioDao = usuarioDao;
 	}

@@ -1,7 +1,5 @@
 package entidades;
 
-import vista.MenuView;
-
 public abstract class Usuario {
 	private Integer id;
 	private String username;
@@ -21,8 +19,6 @@ public abstract class Usuario {
 		this.apellido = apellido;
 		this.dni = dni;
 	}
-
-	public abstract MenuView crearMenu();
 
 	public boolean autenticaCon(String password) {
 		return this.password != null && this.password.equals(password);

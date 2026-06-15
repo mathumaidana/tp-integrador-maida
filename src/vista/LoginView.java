@@ -3,6 +3,8 @@ package vista;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import entidades.Cliente;
+import entidades.Empleado;
 import entidades.Usuario;
 import persistencia.UsuarioDao;
 import servicio.AutenticacionException;
@@ -24,7 +26,14 @@ public class LoginView {
 		try {
 			Usuario usuario = autenticacionServicio.autenticar(username, password);
 			frame.dispose();
-			MenuView menu = usuario.crearMenu();
+			MenuView menu;
+			if (usuario instanceof Empleado) {
+				menu = new MenuEmpleadoView((Empleado) usuario);
+			} else if (usuario instanceof Cliente) {
+				menu = new MenuClienteView((Cliente) usuario);
+			} else {
+				throw new IllegalStateException("Tipo de usuario no reconocido: " + usuario.getClass().getSimpleName());
+			}
 			menu.alCerrar(LoginView::new);
 			menu.mostrar();
 		} catch (AutenticacionException ex) {

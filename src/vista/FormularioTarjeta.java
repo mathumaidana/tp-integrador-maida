@@ -31,7 +31,7 @@ import persistencia.TarjetaDao;
 import servicio.ClienteServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
-import servicio.SaldoInsuficienteException;
+import entidades.SaldoInsuficienteException;
 import servicio.TarjetaDuplicadaException;
 import servicio.TarjetaInexistenteException;
 import servicio.TarjetaServicio;

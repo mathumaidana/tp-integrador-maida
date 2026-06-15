@@ -23,7 +23,7 @@ import persistencia.TransferenciaDao;
 import servicio.CuentaServicio;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
-import servicio.SaldoInsuficienteException;
+import entidades.SaldoInsuficienteException;
 import servicio.TransferenciaInvalidaException;
 import servicio.TransferenciaServicio;
 

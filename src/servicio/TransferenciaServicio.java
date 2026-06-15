@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import entidades.Cuenta;
 import entidades.Movimiento;
+import entidades.SaldoInsuficienteException;
 import entidades.TipoMovimiento;
 import persistencia.TransferenciaDao;
 

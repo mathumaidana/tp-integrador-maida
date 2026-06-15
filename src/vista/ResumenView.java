@@ -23,7 +23,6 @@ import javax.swing.border.EmptyBorder;
 import entidades.Cliente;
 import entidades.Cuenta;
 import entidades.Movimiento;
-import entidades.TipoMovimiento;
 import persistencia.CuentaDao;
 import servicio.CuentaServicio;
 import servicio.LeyendoException;
@@ -139,7 +138,7 @@ public class ResumenView {
 			double total = 0;
 			for (Movimiento m : movs) {
 				modelo.addElement(m);
-				total += signo(m.getTipo()) * m.getMonto();
+				total += m.getTipo().signo() * m.getMonto();
 			}
 			if (movs.isEmpty()) {
 				totalLbl.setText("Sin movimientos para el filtro seleccionado.");
@@ -169,13 +168,4 @@ public class ResumenView {
 		return out;
 	}
 
-	private int signo(TipoMovimiento tipo) {
-		switch (tipo) {
-			case TRANSFERENCIA_RECIBIDA:
-			case PAGO_TARJETA:
-				return 1;
-			default:
-				return -1;
-		}
-	}
 }

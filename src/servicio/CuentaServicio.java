@@ -24,7 +24,7 @@ public class CuentaServicio {
 	}
 
 	public void agregar(Cuenta c)
-			throws GrabandoException, CuentaDuplicadaException, SaldoInicialInvalidoException {
+			throws GrabandoException, CuentaDuplicadaException, SaldoInicialInvalidoException, DatosInvalidosException {
 		try {
 			validarReferencia(c);
 			validarSaldoInicial(c);
@@ -76,7 +76,7 @@ public class CuentaServicio {
 	}
 
 	public void modificar(Cuenta c) throws GrabandoException, CuentaInexistenteException,
-			CuentaDuplicadaException, OperacionNoPermitidaException {
+			CuentaDuplicadaException, OperacionNoPermitidaException, DatosInvalidosException {
 		try {
 			Cuenta existente = cuentaDao.leer(c.getId());
 			if (existente == null) {
@@ -121,11 +121,11 @@ public class CuentaServicio {
 		}
 	}
 
-	private void validarReferencia(Cuenta c) throws CuentaDuplicadaException {
+	private void validarReferencia(Cuenta c) throws DatosInvalidosException {
 		boolean sinAlias = c.getAlias() == null || c.getAlias().trim().isEmpty();
 		boolean sinCbu = c.getCbu() == null || c.getCbu().trim().isEmpty();
 		if (sinAlias && sinCbu) {
-			throw new CuentaDuplicadaException("Cargá al menos un alias o un CBU para identificar la cuenta.");
+			throw new DatosInvalidosException("Cargá al menos un alias o un CBU para identificar la cuenta.");
 		}
 	}
 

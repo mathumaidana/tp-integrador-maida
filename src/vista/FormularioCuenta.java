@@ -29,6 +29,7 @@ import servicio.ClienteServicio;
 import servicio.CuentaDuplicadaException;
 import servicio.CuentaInexistenteException;
 import servicio.CuentaServicio;
+import servicio.DatosInvalidosException;
 import servicio.GrabandoException;
 import servicio.LeyendoException;
 import servicio.OperacionNoPermitidaException;
@@ -246,7 +247,7 @@ public class FormularioCuenta {
 			limpiarFormulario();
 			refrescarLista();
 		} catch (CuentaDuplicadaException | CuentaInexistenteException | SaldoInicialInvalidoException
-				| OperacionNoPermitidaException ex) {
+				| OperacionNoPermitidaException | DatosInvalidosException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Aviso", JOptionPane.WARNING_MESSAGE);
 		} catch (GrabandoException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
