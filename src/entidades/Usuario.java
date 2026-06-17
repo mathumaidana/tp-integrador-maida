@@ -1,5 +1,7 @@
 package entidades;
 
+import vista.MenuView;
+
 public abstract class Usuario {
 	private Integer id;
 	private String username;
@@ -71,6 +73,8 @@ public abstract class Usuario {
 	public void setDni(String dni) {
 		this.dni = dni;
 	}
+
+	public abstract MenuView crearMenu();
 
 	public String getNombreCompleto() {
 		return nombre + " " + apellido;
