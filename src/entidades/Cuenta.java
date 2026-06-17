@@ -1,6 +1,5 @@
 package entidades;
 
-
 public abstract class Cuenta {
 	protected Integer id;
 	protected String alias;
