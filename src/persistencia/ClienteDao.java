@@ -78,13 +78,14 @@ public class ClienteDao extends BaseH2 implements ICrud<Cliente> {
 
 	public void borrarEnCascada(Integer id) throws SQLException {
 		String[] sqls = {
+			"DELETE FROM CHEQUES WHERE ID_CUENTA IN (SELECT ID FROM CUENTAS WHERE ID_TITULAR = ?)",
 			"DELETE FROM MOVIMIENTOS WHERE ID_CUENTA IN (SELECT ID FROM CUENTAS WHERE ID_TITULAR = ?)",
 			"DELETE FROM MOVIMIENTOS WHERE ID_TARJETA IN (SELECT ID FROM TARJETAS WHERE ID_TITULAR = ?)",
 			"DELETE FROM CUENTAS WHERE ID_TITULAR = ?",
 			"DELETE FROM TARJETAS WHERE ID_TITULAR = ?",
 			"DELETE FROM USUARIOS WHERE ID = ? AND ROL = 'CLIENTE'"
 		};
-		Object[][] params = { { id }, { id }, { id }, { id }, { id } };
+		Object[][] params = { { id }, { id }, { id }, { id }, { id }, { id } };
 		transaccionSql(sqls, params);
 	}
 

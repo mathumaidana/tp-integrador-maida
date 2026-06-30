@@ -86,10 +86,11 @@ public class CuentaDao extends BaseH2 implements ICrud<Cuenta> {
 
 	public void borrarEnCascada(Integer id) throws SQLException {
 		String[] sqls = {
+			"DELETE FROM CHEQUES WHERE ID_CUENTA = ?",
 			"DELETE FROM MOVIMIENTOS WHERE ID_CUENTA = ?",
 			"DELETE FROM CUENTAS WHERE ID = ?"
 		};
-		Object[][] params = { { id }, { id } };
+		Object[][] params = { { id }, { id }, { id } };
 		transaccionSql(sqls, params);
 	}
 
