@@ -79,19 +79,13 @@ public class ChequeServicio {
 		if (!ch.estaPendiente()) {
 			throw new OperacionNoPermitidaException("Solo se puede anular un cheque pendiente.");
 		}
+		EstadoCheque previo = ch.getEstado();
+		ch.setEstado(EstadoCheque.ANULADO);
 		try {
-			ch.setEstado(EstadoCheque.ANULADO);
 			chequeDao.modificar(ch);
 		} catch (SQLException e) {
+			ch.setEstado(previo); // revertir en memoria si la persistencia falló
 			throw new GrabandoException("Error al anular el cheque: " + e.getMessage());
-		}
-	}
-
-	public List<Cheque> listar() throws LeyendoException {
-		try {
-			return chequeDao.leer();
-		} catch (SQLException e) {
-			throw new LeyendoException("Error al listar cheques: " + e.getMessage());
 		}
 	}
 
