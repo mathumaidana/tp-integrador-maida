@@ -24,7 +24,7 @@ public class MenuClienteView extends MenuView {
 
 	@Override
 	protected JPanel crearPanelOpciones() {
-		JPanel panel = new JPanel(new GridLayout(5, 1, 8, 8));
+		JPanel panel = new JPanel(new GridLayout(6, 1, 8, 8));
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		JButton cuentas = new JButton("Mis cuentas");
@@ -39,6 +39,9 @@ public class MenuClienteView extends MenuView {
 		JButton tarjetas = new JButton("Mis tarjetas");
 		tarjetas.addActionListener(e -> registrarVentana(new FormularioTarjeta(cliente).getFrame()));
 
+		JButton cheques = new JButton("Cheques");
+		cheques.addActionListener(e -> registrarVentana(new FormularioCheque(cliente).getFrame()));
+
 		JButton salir = new JButton("Salir");
 		salir.addActionListener(e -> frame.dispose());
 
@@ -46,6 +49,7 @@ public class MenuClienteView extends MenuView {
 		panel.add(movimientos);
 		panel.add(transferir);
 		panel.add(tarjetas);
+		panel.add(cheques);
 		panel.add(salir);
 		return panel;
 	}

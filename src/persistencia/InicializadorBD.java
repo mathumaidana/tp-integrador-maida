@@ -49,10 +49,22 @@ public class InicializadorBD extends BaseH2 {
 			+ "FOREIGN KEY (ID_TITULAR) REFERENCES USUARIOS(ID)"
 			+ ")";
 
+		String cheques = "CREATE TABLE IF NOT EXISTS CHEQUES ("
+			+ "ID INT AUTO_INCREMENT PRIMARY KEY, "
+			+ "NUMERO VARCHAR(30) NOT NULL UNIQUE, "
+			+ "MONTO DOUBLE NOT NULL, "
+			+ "BENEFICIARIO VARCHAR(100) NOT NULL, "
+			+ "FECHA_EMISION TIMESTAMP NOT NULL, "
+			+ "ESTADO VARCHAR(20) NOT NULL, "
+			+ "ID_CUENTA INT NOT NULL, "
+			+ "FOREIGN KEY (ID_CUENTA) REFERENCES CUENTAS(ID)"
+			+ ")";
+
 		updateDeleteInsertSql(usuarios);
 		updateDeleteInsertSql(cuentas);
 		updateDeleteInsertSql(movimientos);
 		updateDeleteInsertSql(tarjetas);
+		updateDeleteInsertSql(cheques);
 
 		seedEmpleadoInicial();
 	}

@@ -12,6 +12,9 @@ public enum TipoMovimiento {
 	},
 	PAGO_TARJETA {
 		@Override public int signo() { return 1; }
+	},
+	CHEQUE_COBRADO {
+		@Override public int signo() { return -1; }
 	};
 
 	public abstract int signo();

@@ -29,7 +29,7 @@ public class MenuEmpleadoView extends MenuView {
 
 	@Override
 	protected JPanel crearPanelOpciones() {
-		JPanel panel = new JPanel(new GridLayout(6, 1, 8, 8));
+		JPanel panel = new JPanel(new GridLayout(7, 1, 8, 8));
 		panel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		JButton empleados = new JButton("Empleados");
@@ -44,6 +44,9 @@ public class MenuEmpleadoView extends MenuView {
 		JButton tarjetas = new JButton("Tarjetas");
 		tarjetas.addActionListener(e -> registrarVentana(new FormularioTarjeta().getFrame()));
 
+		JButton cheques = new JButton("Cheques");
+		cheques.addActionListener(e -> registrarVentana(new FormularioCheque().getFrame()));
+
 		JButton resumen = new JButton("Movimientos");
 		resumen.addActionListener(e -> registrarVentana(new ResumenView(null).getFrame()));
 
@@ -54,6 +57,7 @@ public class MenuEmpleadoView extends MenuView {
 		panel.add(clientes);
 		panel.add(cuentas);
 		panel.add(tarjetas);
+		panel.add(cheques);
 		panel.add(resumen);
 		panel.add(salir);
 		return panel;
