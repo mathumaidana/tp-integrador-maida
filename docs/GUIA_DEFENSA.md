@@ -1181,8 +1181,10 @@ menu.mostrar();
 - `vista/FormularioCheque.java`, con botón "Cheques" en `MenuClienteView` y `MenuEmpleadoView`.
 - Tabla `CHEQUES` (FK a `CUENTAS`) en `InicializadorBD`, y valor `CHEQUE_COBRADO` en el enum `TipoMovimiento`.
 
+**`permiteCheques()` se usa en dos capas (defensa en profundidad):** el combo "Cuenta emisora" de `FormularioCheque` solo lista cuentas donde `permiteCheques()` es `true` (filtro polimórfico en la vista, mejor UX), y `ChequeServicio.emitir()` revalida igual (nunca confiar solo en la UI: la regla vive en el servicio).
+
 **Flujo en dos pasos:**
-- **Emitir:** valida `cuenta.permiteCheques()` (despacho polimórfico; caja de ahorro → `OperacionNoPermitidaException`) y que el monto sea > 0 (`DatosInvalidosException`). Crea el cheque `PENDIENTE`. **No toca el saldo** (un cheque mueve plata recién al cobrarse).
+- **Emitir:** valida `cuenta.permiteCheques()` (despacho polimórfico; si llegara una caja de ahorro → `OperacionNoPermitidaException`) y que el monto sea > 0 (`DatosInvalidosException`). Crea el cheque `PENDIENTE`. **No toca el saldo** (un cheque mueve plata recién al cobrarse).
 - **Cobrar:** `cuenta.debitar(monto)` (reusa `saldoMinimo()` polimórfico, incluido el acuerdo de descubierto), inserta el `Movimiento(CHEQUE_COBRADO)` y marca `COBRADO`, todo en una `transaccionSql` (atómico). `setEstado(COBRADO)` ocurre solo si la persistencia tuvo éxito.
 - **Anular:** `PENDIENTE → ANULADO`.
 

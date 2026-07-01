@@ -338,7 +338,7 @@ Un método que define el esqueleto fijo de un algoritmo y delega pasos a las sub
 Porque es una arquitectura DAO sin ORM, y ahí la navegación top-down idiomática es por query: `cuentaDao.leerPorTitular(idCliente)`, `movimientoDao.leerPorCuenta(cuenta)` — el equivalente manual a un repository method / `JOIN FETCH`. La relación es unidireccional hijo→padre (`Cuenta` conoce su `Cliente`) porque esa dirección la necesito **siempre** (para mapear desde la BD y mostrar el titular); la inversa la necesito **a veces** y la resuelvo con una query puntual. Si `Cliente` cacheara `List<Cuenta>`, sin Unit of Work esa lista quedaría **rancia** apenas se crea una cuenta, y crearía **referencia circular** con `Cuenta.titular` (riesgo de recursión en `toString`/`equals`). Además ya evité el N+1: `leerPorTitular` hace 2 queries fijas, no una por cuenta. Las colecciones las pongo donde el dato es fresco y acotado: el servicio devuelve `List<Cuenta>` cuando la vista lo pide.
 
 **¿Dónde se usa `permiteCheques()`? (feature de cheques)**
-En `ChequeServicio.emitir()`: `if (!ch.getCuenta().permiteCheques()) throw new OperacionNoPermitidaException(...)`. Es despacho polimórfico — `CuentaCorriente` devuelve `true`, `CajaAhorro` `false`, así que solo una cuenta corriente puede emitir cheques. El flujo es de dos pasos: **emitir** crea el cheque PENDIENTE (acá vive la validación de `permiteCheques()`), y **cobrar** ejecuta `cuenta.debitar(monto)` (que reusa `saldoMinimo()` polimórfico) e inserta el movimiento `CHEQUE_COBRADO`, todo en una transacción atómica (`transaccionSql`). Anular pasa el cheque PENDIENTE → ANULADO.
+En **dos** lugares, es despacho polimórfico (`CuentaCorriente` → `true`, `CajaAhorro` → `false`): (1) en la **vista**, el combo "Cuenta emisora" solo lista cuentas donde `permiteCheques()` es `true`, así el cliente no ve las cajas de ahorro; (2) en el **servicio**, `ChequeServicio.emitir()` revalida (`if (!ch.getCuenta().permiteCheques()) throw ...`) — defensa en profundidad, nunca confiar solo en la UI. El flujo es de dos pasos: **emitir** crea el cheque PENDIENTE (sin tocar saldo), y **cobrar** ejecuta `cuenta.debitar(monto)` (reusa `saldoMinimo()` polimórfico) e inserta el movimiento `CHEQUE_COBRADO`, todo en una transacción atómica. Anular pasa PENDIENTE → ANULADO.
 
 **¿Qué cambiarías o qué no quedó perfecto? (la pregunta honesta)**
 `EmpleadoDao` y `ClienteDao` comparten ~85% del SQL (solo cambia el rol). Lo refactorizaría a un `UsuarioDaoBase<T extends Usuario>` con el SQL parametrizado (lo tengo identificado). No lo hice por tiempo, no por no verlo. También: passwords en texto plano (faltaría hashear con BCrypt) y un N+1 al listar cuentas con su titular (se resuelve con un JOIN). Ninguno afecta la demo.
@@ -384,8 +384,12 @@ public void cobrar(Cheque ch) throws SaldoInsuficienteException, ... {
 }
 ```
 
+**`permiteCheques()` se usa en dos capas** (defensa en profundidad):
+- **En la vista:** el combo "Cuenta emisora" solo lista cuentas donde `permiteCheques()` es `true` — el cliente ni siquiera ve las cajas de ahorro como opción (mejor UX).
+- **En el servicio:** `emitir()` revalida igual. La UI es comodidad, no la garantía: aunque llegara una cuenta inválida (bug, request forjado), el servicio la rechaza. **Nunca confiar solo en la UI** — la regla de negocio vive en el dominio/servicio.
+
 **Qué demuestra (puntos para la defensa):**
-- **Polimorfismo dos veces:** `permiteCheques()` al emitir (cuenta corriente sí, caja de ahorro no) y `saldoMinimo()` vía `debitar()` al cobrar (respeta el acuerdo de descubierto de la cuenta corriente).
+- **Polimorfismo:** `permiteCheques()` (filtra el combo Y valida en el servicio) y `saldoMinimo()` vía `debitar()` al cobrar (respeta el acuerdo de descubierto de la cuenta corriente).
 - **Open/Closed:** agregué un valor nuevo al enum `TipoMovimiento` (`CHEQUE_COBRADO`) y el compilador me obligó a darle su `signo()` (-1). `ResumenView` no se tocó.
 - **Atomicidad:** `cobrar` actualiza saldo + inserta movimiento + marca el cheque, todo en una `transaccionSql` (o las tres o ninguna). Mismo patrón que la transferencia.
 - **Mismas capas:** entidad `Cheque` + enum `EstadoCheque`, `ChequeDao`, `ChequeServicio`, `FormularioCheque`. Tabla `CHEQUES` con FK a `CUENTAS`. Botón "Cheques" en el menú del cliente y del empleado.
