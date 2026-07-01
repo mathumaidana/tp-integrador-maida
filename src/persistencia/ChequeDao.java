@@ -72,10 +72,6 @@ public class ChequeDao extends BaseH2 implements ICrud<Cheque> {
 		updateDeleteInsertSql("DELETE FROM CHEQUES WHERE ID = ?", id);
 	}
 
-	/**
-	 * Cobra el cheque de forma atómica: debita la cuenta, registra el movimiento
-	 * y marca el cheque como COBRADO. O se hacen las tres cosas, o ninguna.
-	 */
 	public void cobrar(Cheque ch, Movimiento m) throws SQLException {
 		String[] sqls = {
 			"UPDATE CUENTAS SET SALDO = ? WHERE ID = ?",

@@ -20,11 +20,6 @@ public class ChequeServicio {
 		this.chequeDao = chequeDao;
 	}
 
-	/**
-	 * Emite un cheque PENDIENTE. Solo las cuentas que permiten cheques
-	 * (cuenta corriente) pueden emitir: la validación es polimórfica.
-	 * No toca el saldo: el dinero se mueve recién al cobrar.
-	 */
 	public void emitir(Cheque ch)
 			throws OperacionNoPermitidaException, ChequeDuplicadoException, GrabandoException, DatosInvalidosException {
 		if (ch.getCuenta() == null) {
@@ -50,10 +45,6 @@ public class ChequeServicio {
 		}
 	}
 
-	/**
-	 * Cobra un cheque pendiente: debita la cuenta (reusa la validación
-	 * polimórfica de saldoMinimo) y registra el movimiento, todo atómico.
-	 */
 	public void cobrar(Cheque ch)
 			throws OperacionNoPermitidaException, SaldoInsuficienteException, GrabandoException {
 		if (!ch.estaPendiente()) {
@@ -84,7 +75,7 @@ public class ChequeServicio {
 		try {
 			chequeDao.modificar(ch);
 		} catch (SQLException e) {
-			ch.setEstado(previo); // revertir en memoria si la persistencia falló
+			ch.setEstado(previo);
 			throw new GrabandoException("Error al anular el cheque: " + e.getMessage());
 		}
 	}

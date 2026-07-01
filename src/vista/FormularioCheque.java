@@ -93,8 +93,6 @@ public class FormularioCheque {
 		JPanel grid = new JPanel(new GridLayout(4, 2, 8, 6));
 		grid.add(new JLabel("Cuenta emisora"));
 		cuentaCombo = new JComboBox<>();
-		// Ignorar los eventos disparados mientras se repuebla el combo (cargarCuentas):
-		// solo refrescar la lista cuando el usuario cambia de cuenta.
 		cuentaCombo.addActionListener(e -> { if (!cargandoCuentas) refrescar(); });
 		grid.add(cuentaCombo);
 
@@ -162,8 +160,6 @@ public class FormularioCheque {
 			List<Cuenta> cuentas = modoEmpleado
 				? cuentaServicio.listar()
 				: cuentaServicio.listarPorCliente(clienteFijo);
-			// Solo las cuentas que permiten cheques son candidatas a emisora (filtro polimórfico).
-			// El servicio revalida igual: la UI es comodidad, no la garantía.
 			for (Cuenta c : cuentas) if (c.permiteCheques()) cuentaCombo.addItem(c);
 			if (sel instanceof Cuenta) {
 				for (int i = 0; i < cuentaCombo.getItemCount(); i++) {
@@ -233,7 +229,7 @@ public class FormularioCheque {
 			chequeServicio.cobrar(sel);
 			JOptionPane.showMessageDialog(frame, "Cheque cobrado.",
 				"Aviso", JOptionPane.INFORMATION_MESSAGE);
-			cargarCuentas(); // el saldo de la cuenta cambió: recargar el combo
+			cargarCuentas();
 			refrescar();
 		} catch (SaldoInsuficienteException ex) {
 			JOptionPane.showMessageDialog(frame, ex.getMessage(), "Saldo", JOptionPane.WARNING_MESSAGE);
